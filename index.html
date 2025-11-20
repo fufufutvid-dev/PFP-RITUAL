@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { Upload, Download, RefreshCw, Sparkles, Wand2 } from 'lucide-react';
 
-const RitualGenerator = () => {
+export default function RitualGenerator() {
   const [uploadedImage, setUploadedImage] = useState(null);
   const [generatedImage, setGeneratedImage] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -10,160 +10,143 @@ const RitualGenerator = () => {
   const fileInputRef = useRef(null);
 
   const effects = {
-    mystical: {
-      name: 'Mystical Aura',
-      description: 'Glowing ethereal energy',
-      apply: (ctx, imgData) => {
-        const data = imgData.data;
-        for (let i = 0; i < data.length; i += 4) {
-          data[i] = Math.min(255, data[i] * 1.2);
-          data[i + 1] = Math.min(255, data[i + 1] * 1.15);
-          data[i + 2] = Math.min(255, data[i + 2] * 1.3);
-        }
-        return imgData;
-      }
-    },
-    cosmic: {
-      name: 'Cosmic',
-      description: 'Deep space energy',
-      apply: (ctx, imgData) => {
-        const data = imgData.data;
-        for (let i = 0; i < data.length; i += 4) {
-          data[i] = data[i] * 0.8;
-          data[i + 1] = Math.min(255, data[i + 1] * 1.1);
-          data[i + 2] = Math.min(255, data[i + 2] * 1.3);
-        }
-        return imgData;
-      }
-    },
-    divine: {
-      name: 'Divine Light',
-      description: 'Sacred golden glow',
-      apply: (ctx, imgData) => {
-        const data = imgData.data;
-        for (let i = 0; i < data.length; i += 4) {
-          data[i] = Math.min(255, data[i] * 1.25);
-          data[i + 1] = Math.min(255, data[i + 1] * 1.2);
-          data[i + 2] = Math.min(255, data[i + 2] * 0.9);
-        }
-        return imgData;
-      }
-    },
-    phantom: {
-      name: 'Phantom',
-      description: 'Spectral ethereal form',
-      apply: (ctx, imgData) => {
-        const data = imgData.data;
-        for (let i = 0; i < data.length; i += 4) {
-          const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
-          data[i] = avg * 1.15;
-          data[i + 1] = avg * 1.1;
-          data[i + 2] = avg * 1.2;
-          data[i + 3] = data[i + 3] * 0.95;
-        }
-        return imgData;
-      }
-    },
-    infernal: {
-      name: 'Infernal',
-      description: 'Fiery chaos energy',
-      apply: (ctx, imgData) => {
-        const data = imgData.data;
-        for (let i = 0; i < data.length; i += 4) {
-          data[i] = Math.min(255, data[i] * 1.4);
-          data[i + 1] = Math.min(255, data[i + 1] * 0.85);
-          data[i + 2] = data[i + 2] * 0.7;
-        }
-        return imgData;
-      }
-    },
-    celestial: {
-      name: 'Celestial',
-      description: 'Starry dimensional shift',
-      apply: (ctx, imgData) => {
-        const data = imgData.data;
-        for (let i = 0; i < data.length; i += 4) {
-          data[i] = Math.min(255, data[i] * 1.1);
-          data[i + 1] = Math.min(255, data[i + 1] * 1.2);
-          data[i + 2] = Math.min(255, data[i + 2] * 1.35);
-        }
-        return imgData;
+    mystical: { name: 'Mystical Aura', description: 'Glowing ethereal energy' },
+    cosmic: { name: 'Cosmic', description: 'Deep space energy' },
+    divine: { name: 'Divine Light', description: 'Sacred golden glow' },
+    phantom: { name: 'Phantom', description: 'Spectral ethereal form' },
+    infernal: { name: 'Infernal', description: 'Fiery chaos energy' },
+    celestial: { name: 'Celestial', description: 'Starry dimensional shift' }
+  };
+
+  const applyEffect = (ctx, imgData, effectType) => {
+    const data = imgData.data;
+    
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+
+      if (effectType === 'mystical') {
+        data[i] = Math.min(255, r * 1.2);
+        data[i + 1] = Math.min(255, g * 1.15);
+        data[i + 2] = Math.min(255, b * 1.3);
+      } else if (effectType === 'cosmic') {
+        data[i] = r * 0.8;
+        data[i + 1] = Math.min(255, g * 1.1);
+        data[i + 2] = Math.min(255, b * 1.3);
+      } else if (effectType === 'divine') {
+        data[i] = Math.min(255, r * 1.25);
+        data[i + 1] = Math.min(255, g * 1.2);
+        data[i + 2] = b * 0.9;
+      } else if (effectType === 'phantom') {
+        const avg = (r + g + b) / 3;
+        data[i] = avg * 1.15;
+        data[i + 1] = avg * 1.1;
+        data[i + 2] = avg * 1.2;
+        data[i + 3] = data[i + 3] * 0.95;
+      } else if (effectType === 'infernal') {
+        data[i] = Math.min(255, r * 1.4);
+        data[i + 1] = Math.min(255, g * 0.85);
+        data[i + 2] = b * 0.7;
+      } else if (effectType === 'celestial') {
+        data[i] = Math.min(255, r * 1.1);
+        data[i + 1] = Math.min(255, g * 1.2);
+        data[i + 2] = Math.min(255, b * 1.35);
       }
     }
+    return imgData;
   };
 
   const handleImageUpload = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
-        setUploadedImage(event.target.result);
+        setUploadedImage(event.target?.result);
         setGeneratedImage(null);
       };
       reader.readAsDataURL(file);
     }
   };
 
-  const addRitualFrame = (ctx, width, height) => {
-    ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
-    ctx.lineWidth = 3;
-    ctx.setLineDash([10, 10]);
-    ctx.strokeRect(8, 8, width - 16, height - 16);
-    ctx.setLineDash([]);
-
-    const gradient = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.max(width, height) / 1.5);
-    gradient.addColorStop(0, 'rgba(255, 215, 0, 0.1)');
-    gradient.addColorStop(1, 'rgba(138, 43, 226, 0.15)');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, width, height);
-  };
-
   const generateRitual = async () => {
     if (!uploadedImage) return;
 
     setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    setTimeout(() => {
+      try {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        
+        img.onload = () => {
+          const canvas = canvasRef.current;
+          if (!canvas) return;
+          
+          const size = 512;
+          canvas.width = size;
+          canvas.height = size;
+          
+          const ctx = canvas.getContext('2d');
+          if (!ctx) return;
+          
+          ctx.fillStyle = '#0a0a0a';
+          ctx.fillRect(0, 0, size, size);
 
-    const img = new Image();
-    img.onload = () => {
-      const canvas = canvasRef.current;
-      const size = 512;
-      canvas.width = size;
-      canvas.height = size;
-      
-      const ctx = canvas.getContext('2d');
-      ctx.fillStyle = '#0a0a0a';
-      ctx.fillRect(0, 0, size, size);
+          const scale = Math.min(size / img.width, size / img.height);
+          const x = (size - img.width * scale) / 2;
+          const y = (size - img.height * scale) / 2;
+          
+          ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
 
-      const x = (size - img.width) / 2;
-      const y = (size - img.height) / 2;
-      ctx.drawImage(img, x, y, img.width, img.height);
+          let imageData = ctx.getImageData(0, 0, size, size);
+          imageData = applyEffect(ctx, imageData, selectedEffect);
+          ctx.putImageData(imageData, 0, 0);
 
-      let imageData = ctx.getImageData(0, 0, size, size);
-      imageData = effects[selectedEffect].apply(ctx, imageData);
-      ctx.putImageData(imageData, 0, 0);
+          // Add ritual frame
+          ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
+          ctx.lineWidth = 3;
+          ctx.setLineDash([10, 10]);
+          ctx.strokeRect(8, 8, size - 16, size - 16);
+          ctx.setLineDash([]);
 
-      addRitualFrame(ctx, size, size);
+          // Add gradient overlay
+          const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, Math.max(size, size) / 1.5);
+          gradient.addColorStop(0, 'rgba(255, 215, 0, 0.1)');
+          gradient.addColorStop(1, 'rgba(138, 43, 226, 0.15)');
+          ctx.fillStyle = gradient;
+          ctx.fillRect(0, 0, size, size);
 
-      const symbols = ['✦', '✧', '◆', '●', '○'];
-      ctx.fillStyle = 'rgba(255, 215, 0, 0.5)';
-      ctx.font = 'bold 20px serif';
-      symbols.forEach((sym, i) => {
-        const angle = (i / symbols.length) * Math.PI * 2;
-        const radius = size / 2.5;
-        const px = size / 2 + Math.cos(angle) * radius;
-        const py = size / 2 + Math.sin(angle) * radius;
-        ctx.save();
-        ctx.translate(px, py);
-        ctx.rotate(angle);
-        ctx.fillText(sym, -5, 5);
-        ctx.restore();
-      });
+          // Add symbols
+          const symbols = ['✦', '✧', '◆', '●', '○'];
+          ctx.fillStyle = 'rgba(255, 215, 0, 0.5)';
+          ctx.font = 'bold 20px serif';
+          
+          symbols.forEach((sym, i) => {
+            const angle = (i / symbols.length) * Math.PI * 2;
+            const radius = size / 2.5;
+            const px = size / 2 + Math.cos(angle) * radius;
+            const py = size / 2 + Math.sin(angle) * radius;
+            ctx.save();
+            ctx.translate(px, py);
+            ctx.rotate(angle);
+            ctx.fillText(sym, -5, 5);
+            ctx.restore();
+          });
 
-      setGeneratedImage(canvas.toDataURL());
-    };
-    img.src = uploadedImage;
-    setLoading(false);
+          setGeneratedImage(canvas.toDataURL());
+          setLoading(false);
+        };
+
+        img.onerror = () => {
+          setLoading(false);
+        };
+        
+        img.src = uploadedImage;
+      } catch (err) {
+        setLoading(false);
+      }
+    }, 800);
   };
 
   const downloadImage = () => {
@@ -176,7 +159,7 @@ const RitualGenerator = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-purple-900 to-black text-white overflow-hidden">
-      {/* Animated background elements */}
+      {/* Background Effects */}
       <div className="fixed inset-0 opacity-20 pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-screen filter blur-3xl animate-pulse"></div>
         <div className="absolute bottom-20 right-10 w-72 h-72 bg-violet-600 rounded-full mix-blend-screen filter blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
@@ -199,9 +182,9 @@ const RitualGenerator = () => {
       {/* Main Content */}
       <div className="relative z-10 max-w-6xl mx-auto px-6 pb-16">
         <div className="grid md:grid-cols-2 gap-12">
-          {/* Upload Section */}
+          {/* Left Column - Upload */}
           <div className="space-y-6">
-            <div className="bg-gradient-to-br from-purple-900/40 to-black border border-purple-500/30 rounded-2xl p-8 backdrop-blur-lg hover:border-purple-400/60 transition-all">
+            <div className="bg-gradient-to-br from-purple-900/40 to-black border border-purple-500/30 rounded-2xl p-8 backdrop-blur-lg">
               <div className="flex flex-col items-center justify-center space-y-6">
                 <div 
                   onClick={() => fileInputRef.current?.click()}
@@ -213,7 +196,7 @@ const RitualGenerator = () => {
                     <div className="text-center space-y-3">
                       <Upload className="w-12 h-12 text-purple-400 mx-auto" />
                       <p className="text-gray-300 font-medium">Upload Your Photo</p>
-                      <p className="text-gray-500 text-sm">Click or drag image here</p>
+                      <p className="text-gray-500 text-sm">PNG, JPG or GIF</p>
                     </div>
                   )}
                 </div>
@@ -271,7 +254,7 @@ const RitualGenerator = () => {
             </button>
           </div>
 
-          {/* Preview Section */}
+          {/* Right Column - Preview */}
           <div className="space-y-6">
             <div className="bg-gradient-to-br from-purple-900/40 to-black border border-purple-500/30 rounded-2xl p-8 backdrop-blur-lg">
               <div className="aspect-square bg-gradient-to-br from-purple-800/20 to-black border border-purple-500/50 rounded-xl overflow-hidden flex items-center justify-center">
@@ -315,6 +298,4 @@ const RitualGenerator = () => {
       </div>
     </div>
   );
-};
-
-export default RitualGenerator;
+}
