@@ -4,421 +4,192 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PFP RITUAL GENERATOR</title>
-  <meta name="description" content="Upload your image and let the ancient ritual transform it into a sacred PFP."/>
-  
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@900&family=Orbitron:wght@500;800&display=swap');
     
-    :root {
-      --gold: #d4af37;
-      --dark: #0c0c0c;
-      --darker: #050505;
-      --glow: #d4af3799;
-    }
-    
+    :root { --gold: #d4af37; --dark: #0c0c0c; --glow: #d4af3799; }
     * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      background: var(--darker);
-      color: #eee;
-      font-family: 'Orbitron', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-      position: relative;
-    }
-    
+    body { background:#000; color:#eee; font-family:'Orbitron',sans-serif; min-height:100vh; overflow-x:hidden; position:relative; }
     canvas#particles { position:fixed; top:0; left:0; width:100%; height:100%; z-index:1; pointer-events:none; }
     
-    .container {
-      position: relative;
-      z-index: 2;
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 2rem;
-      text-align: center;
-    }
+    .container { position:relative; z-index:2; max-width:1100px; margin:0 auto; padding:2rem; text-align:center; }
+    header { margin-bottom:4rem; padding-top:3rem; }
+    .logo { width:180px; height:180px; filter:drop-shadow(0 0 30px var(--glow)); margin-bottom:1.5rem; }
+    h1 { font-family:'Cinzel Decorative',cursive; font-size:4.5rem; background:linear-gradient(90deg,#d4af37,#fff,#d4af37); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow:0 0 40px var(--glow); letter-spacing:8px; }
+    .subtitle { font-size:1.2rem; opacity:0.8; margin-top:1rem; letter-spacing:4px; }
     
-    header {
-      margin-bottom: 4rem;
-      padding-top: 3rem;
-    }
+    .upload-area { background:rgba(20,20,20,0.6); border:2px dashed var(--gold); border-radius:20px; padding:3rem; margin:3rem auto; max-width:500px; cursor:pointer; transition:all .4s; backdrop-filter:blur(10px); }
+    .upload-area:hover, .upload-area.dragover { border-color:#fff; box-shadow:0 0 40px rgba(212,175,55,0.4); }
     
-    .logo {
-      width: 180px;
-      height: 180px;
-      filter: drop-shadow(0 0 30px var(--glow));
-      margin-bottom: 1.5rem;
-    }
+    .preview { margin:3rem auto; max-width:440px; }
+    .preview img { width:100%; border-radius:20px; box-shadow:0 0 60px rgba(212,175,55,0.6); }
+    button { background:linear-gradient(45deg,#d4af37,#ffd700); color:#000; border:none; padding:1rem 3rem; font-size:1.3rem; font-weight:bold; border-radius:50px; cursor:pointer; margin:2rem; box-shadow:0 10px 30px rgba(212,175,55,0.4); transition:all .3s; }
+    button:hover { transform:translateY(-5px); box-shadow:0 20px 40px rgba(212,175,55,0.6); }
     
-    h1 {
-      font-family: 'Cinzel Decorative', cursive;
-      font-size: 4.5rem;
-      background: linear-gradient(90deg, #d4af37, #fff, #d4af37);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0 0 40px var(--glow);
-      letter-spacing: 8px;
-    }
-    
-    .subtitle {
-      font-size: 1.2rem;
-      opacity: 0.8;
-      margin-top: 1rem;
-      letter-spacing: 4px;
-    }
-    
-    .upload-area {
-      background: rgba(20,20,20,0.6);
-      border: 2px dashed var(--gold);
-      border-radius: 20px;
-      padding: 3rem;
-      margin: 3rem auto;
-      max-width: 500px;
-      cursor: pointer;
-      transition: all 0.4s;
-      backdrop-filter: blur(10px);
-    }
-    
-    .upload-area:hover {
-      border-color: #fff;
-      box-shadow: 0 0 40px rgba(212,175,55,0.4);
-    }
-    
-    .upload-area.dragover {
-      border-color: #fff;
-      box-shadow: 0 0 40px rgba(212,175,55,0.4);
-    }
-    
-    .error {
-      color: #ff6b6b;
-      margin-top: 1rem;
-      font-size: 1rem;
-    }
-    
-    .preview {
-      margin: 3rem auto;
-      max-width: 420px;
-    }
-    
-    .preview img {
-      width: 100%;
-      border-radius: 20px;
-      box-shadow: 0 0 60px rgba(212,175,55,0.5);
-    }
-    
-    button {
-      background: linear-gradient(45deg, #d4af37, #ffd700);
-      color: #000;
-      border: none;
-      padding: 1rem 3rem;
-      font-size: 1.3rem;
-      font-weight: bold;
-      border-radius: 50px;
-      cursor: pointer;
-      margin: 2rem;
-      box-shadow: 0 10px 30px rgba(212,175,55,0.4);
-      transition: all 0.3s;
-    }
-    
-    button:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 20px 40px rgba(212,175,55,0.6);
-    }
-    
-    .credit {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 0.9rem;
-      opacity: 0.6;
-    }
-    
-    .credit a {
-      color: var(--gold);
-      text-decoration: none;
-    }
-    
-    .ritual-effect {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      border-radius: 20px;
-      background: radial-gradient(circle at 50% 50%, rgba(212,175,55,0.4) 0%, transparent 70%);
-      opacity: 0;
-      transition: opacity 1s;
-    }
-    
-    .ritual-effect.active { opacity: 1; }
+    .credit { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); font-size:0.9rem; opacity:0.6; }
+    .credit a { color:var(--gold); text-decoration:none; }
   </style>
 </head>
 <body>
 
-  <canvas id="particles"></canvas>
+<canvas id="particles"></canvas>
 
-  <div class="container">
-    <header>
-      <!-- LOGO EXACTLY AS YOU SENT (REHOSTED TO RELIABLE URL) -->
-      <img src="https://i.imgur.com/2q2i1z.png" alt="Ritual Logo" class="logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMTAxMDEwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2RkZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxvYWRpbmcgUml0dWFscywgQnV0dG9uIFVwZGF0ZTwvdGV4dD48L3N2Zz4=';">
-      <h1>PFP RITUAL</h1>
-      <p class="subtitle">UNLEASH THE ANCIENT POWER</p>
-    </header>
+<div class="container">
+  <header>
+    <img src="https://i.imgur.com/2q2i1z.png" alt="Ritual Logo" class="logo">
+    <h1>PFP RITUAL</h1>
+    <p class="subtitle">UNLEASH THE ANCIENT POWER</p>
+  </header>
 
-    <div class="upload-area" id="dropArea">
-      <p style="font-size:1.4rem; margin-bottom:1rem;">DROP YOUR IMAGE HERE OR CLICK TO SELECT</p>
-      <p>Supports JPG, PNG, GIF (max 5MB)</p>
-      <input type="file" id="fileInput" accept="image/*" hidden>
-      <div id="errorMsg" class="error" style="display:none;"></div>
-    </div>
-
-    <div class="preview" id="previewContainer" style="display:none;">
-      <div style="position:relative; display:inline-block;">
-        <img id="output" src="" alt="Ritualized PFP"/>
-        <div class="ritual-effect" id="effect"></div>
-      </div>
-      <br/>
-      <button onclick="downloadImage()">DOWNLOAD RITUALIZED PFP</button>
-    </div>
-
-    <div class="credit">
-      Ritual symbol by <a href="https://x.com/ega_2ez4crypto" target="_blank">@ega_2ez4crypto</a>
-    </div>
+  <div class="upload-area" id="dropArea">
+    <p style="font-size:1.4rem; margin-bottom:1rem;">DROP YOUR IMAGE OR CLICK TO UPLOAD</p>
+    <input type="file" id="fileInput" accept="image/*" hidden>
   </div>
 
-  <script>
-    // === PARTICLES BACKGROUND ===
-    const canvas = document.getElementById('particles');
-    const ctx = canvas.getContext('2d');
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    
-    let particlesArray = [];
-    const numberOfParticles = 80;
-    
-    class Particle {
-      constructor(){
-        this.x = Math.random() * canvas.width;
-        this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 3 + 0.5;
-        this.speedX = Math.random() * 0.5 - 0.25;
-        this.speedY = Math.random() * 0.5 - 0.25;
-      }
-      update(){
-        this.x += this.speedX;
-        this.y += this.speedY;
-        if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
-        if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
-      }
-      draw(){
-        ctx.fillStyle = 'rgba(212,175,55,0.6)';
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-    
-    function initParticles(){
-      particlesArray = [];
-      for(let i=0; i<numberOfParticles; i++){
-        particlesArray.push(new Particle());
-      }
-    }
-    
-    function animateParticles(){
-      ctx.clearRect(0,0,canvas.width,canvas.height);
-      for(let i = particlesArray.length - 1; i >= 0; i--){
-        particlesArray[i].update();
-        particlesArray[i].draw();
-        if(particlesArray[i].size <= 0.3){
-          particlesArray.splice(i, 1);
-        } else {
-          particlesArray[i].size -= 0.01;
-        }
-      }
-      if(particlesArray.length < numberOfParticles) {
-        particlesArray.push(new Particle());
-      }
-      requestAnimationFrame(animateParticles);
-    }
-    
-    initParticles();
-    animateParticles();
-    window.addEventListener('resize', () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      initParticles();
-    });
+  <div class="preview" id="previewContainer" style="display:none;">
+    <img id="output" src="" alt="Ritualized PFP"/>
+    <br/>
+    <button onclick="downloadImage()">DOWNLOAD RITUALIZED PFP</button>
+    <button onclick="regenerate()">REGENERATE WITH NEW RITUAL</button>
+  </div>
 
-    // === IMPROVED IMAGE UPLOAD & RITUAL EFFECTS ===
-    const dropArea = document.getElementById('dropArea');
-    const fileInput = document.getElementById('fileInput');
-    const previewContainer = document.getElementById('previewContainer');
-    const output = document.getElementById('output');
-    const effect = document.getElementById('effect');
-    const errorMsg = document.getElementById('errorMsg');
+  <div class="credit">
+    Ritual symbol by <a href="https://x.com/ega_2ez4crypto" target="_blank">@ega_2ez4crypto</a>
+  </div>
+</div>
 
-    function showError(msg) {
-      errorMsg.textContent = msg;
-      errorMsg.style.display = 'block';
-      setTimeout(() => { errorMsg.style.display = 'none'; }, 5000);
-    }
+<script>
+// Particles
+const canvas = document.getElementById('particles');
+const ctx = canvas.getContext('2d');
+canvas.width = innerWidth; canvas.height = innerHeight;
+let particles = [];
+for(let i=0;i<80;i++){
+  particles.push({
+    x:Math.random()*canvas.width,
+    y:Math.random()*canvas.height,
+    size:Math.random()*3+0.5,
+    speedX:Math.random()*0.6-0.3,
+    speedY:Math.random()*0.6-0.3
+  });
+}
+function drawParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles.forEach(p=>{
+    p.x += p.speedX; p.y += p.speedY;
+    if(p.x<0||p.x>canvas.width) p.speedX*=-1;
+    if(p.y<0||p.y>canvas.height) p.speedY*=-1;
+    ctx.fillStyle='rgba(212,175,55,0.6)'; ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2); ctx.fill();
+  });
+  requestAnimationFrame(drawParticles);
+}
+drawParticles();
+window.addEventListener('resize',()=>{canvas.width=innerWidth;canvas.height=innerHeight;});
 
-    // Drag & Drop Handlers (with better prevention)
-    ['dragenter', 'dragover'].forEach(evt => {
-      dropArea.addEventListener(evt, e => {
-        e.preventDefault();
-        e.stopPropagation();
-        dropArea.classList.add('dragover');
-      });
-    });
-    
-    ['dragleave', 'dragend', 'drop'].forEach(evt => {
-      dropArea.addEventListener(evt, e => {
-        e.preventDefault();
-        e.stopPropagation();
-        dropArea.classList.remove('dragover');
-      });
-    });
-    
-    dropArea.addEventListener('drop', e => {
-      const files = e.dataTransfer.files;
-      if (files.length > 0) {
-        handleFile(files[0]);
-      } else {
-        showError('No valid image file dropped.');
-      }
-    });
-    
-    // Click to Upload
-    dropArea.addEventListener('click', () => {
-      fileInput.click();
-    });
-    
-    fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) {
-        handleFile(e.target.files[0]);
-      }
-    });
+// Upload
+const dropArea = document.getElementById('dropArea');
+const fileInput = document.getElementById('fileInput');
+let originalImage = null;
 
-    function handleFile(file) {
-      if (!file.type.startsWith('image/')) {
-        showError('Please select a valid image file (JPG, PNG, GIF).');
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        showError('File too large. Max 5MB.');
-        return;
-      }
-      
-      errorMsg.style.display = 'none';
-      
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const img = new Image();
-        img.onload = function() {
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          canvas.width = 420;
-          canvas.height = 420;
-          
-          // Resize and draw base image (preserve aspect ratio)
-          const ratio = Math.min(420 / img.width, 420 / img.height);
-          const newWidth = img.width * ratio;
-          const newHeight = img.height * ratio;
-          const x = (420 - newWidth) / 2;
-          const y = (420 - newHeight) / 2;
-          ctx.drawImage(img, x, y, newWidth, newHeight);
-          
-          // Random ritual style (8 variations)
-          const ritual = Math.floor(Math.random() * 8);
-          
-          // Load and apply exact logo
-          const logo = new Image();
-          logo.crossOrigin = 'anonymous'; // For external image
-          logo.src = "https://i.imgur.com/2q2i1z.png";
-          
-          logo.onload = () => {
-            // Apply logo overlay
-            ctx.globalAlpha = 0.15 + Math.random() * 0.2;
-            ctx.drawImage(logo, 0, 0, 420, 420);
-            
-            // Additional random ritual effects
-            ctx.globalAlpha = 1;
-            if (ritual < 3) {
-              // Gold runes glow
-              ctx.globalAlpha = 0.3;
-              ctx.filter = 'blur(8px) brightness(2)';
-              ctx.drawImage(logo, 0, 0, 420, 420);
-              ctx.filter = 'none';
-            } else if (ritual >= 3 && ritual < 6) {
-              // Dark fire overlay
-              ctx.globalCompositeOperation = 'overlay';
-              const gradient = ctx.createLinearGradient(0, 0, 420, 420);
-              gradient.addColorStop(0, 'rgba(139, 0, 0, 0.4)');
-              gradient.addColorStop(1, 'rgba(255, 140, 0, 0.2)');
-              ctx.fillStyle = gradient;
-              ctx.fillRect(0, 0, 420, 420);
-              ctx.globalCompositeOperation = 'source-over';
-            } else {
-              // Mystic purple hue
-              ctx.globalCompositeOperation = 'color';
-              const purpleGradient = ctx.createLinearGradient(0, 0, 420, 420);
-              purpleGradient.addColorStop(0, 'rgba(75, 0, 130, 0.3)');
-              purpleGradient.addColorStop(1, 'rgba(138, 43, 226, 0.1)');
-              ctx.fillStyle = purpleGradient;
-              ctx.fillRect(0, 0, 420, 420);
-              ctx.globalCompositeOperation = 'source-over';
-            }
-            
-            // Final gold glow border
-            ctx.strokeStyle = '#d4af37';
-            ctx.lineWidth = 12;
-            ctx.shadowColor = '#d4af37';
-            ctx.shadowBlur = 30;
-            ctx.strokeRect(6, 6, 408, 408);
-            ctx.shadowBlur = 0; // Reset shadow
-            
-            output.src = canvas.toDataURL('image/png');
-            previewContainer.style.display = 'block';
-            effect.classList.add('active');
-            
-            // Fade out effect after ritual
-            setTimeout(() => effect.classList.remove('active'), 2000);
-          };
-          
-          logo.onerror = () => {
-            showError('Failed to load ritual symbol. Using base effect.');
-            // Fallback: just base image + border
-            ctx.strokeStyle = '#d4af37';
-            ctx.lineWidth = 12;
-            ctx.shadowColor = '#d4af37';
-            ctx.shadowBlur = 30;
-            ctx.strokeRect(6, 6, 408, 408);
-            ctx.shadowBlur = 0;
-            output.src = canvas.toDataURL('image/png');
-            previewContainer.style.display = 'block';
-          };
-        };
-        img.onerror = () => showError('Failed to load image. Try another file.');
-        img.src = e.target.result;
-      };
-      reader.onerror = () => showError('Error reading file. Try again.');
-      reader.readAsDataURL(file);
-    }
+dropArea.onclick = () => fileInput.click();
+fileInput.onchange = e => { if(e.target.files[0]) processFile(e.target.files[0]); };
 
-    function downloadImage() {
-      try {
-        const link = document.createElement('a');
-        link.download = 'ritual-pfp.png';
-        link.href = output.src;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } catch (err) {
-        showError('Download failed. Right-click the image and save it.');
-      }
-    }
-  </script>
+dropArea.ondragover = dropArea.ondragenter = e => {e.preventDefault(); dropArea.classList.add('dragover');};
+dropArea.ondragleave = dropArea.ondragend = () => dropArea.classList.remove('dragover');
+dropArea.ondrop = e => {e.preventDefault(); dropArea.classList.remove('dragover'); if(e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);};
+
+function processFile(file){
+  if(!file.type.startsWith('image/')) return alert('Please upload an image');
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => { originalImage = img; regenerate(); };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+// 8 Epic Ritual Backgrounds (logo selalu ada)
+const rituals = [
+  // 0 - Pure Gold Temple
+  ctx=>{ ctx.fillStyle='#1a1408'; ctx.fillRect(0,0,440,440);
+         const grad = ctx.createRadialGradient(220,220,0,220,220,300);
+         grad.addColorStop(0,'#d4af37'); grad.addColorStop(1,'#0f0a03'); ctx.fillStyle=grad; ctx.fillRect(0,0,440,440); },
+  // 1 - Obsidian Void
+  ctx=>{ ctx.fillStyle='#000'; ctx.fillRect(0,0,440,440);
+         ctx.fillStyle='rgba(212,175,55,0.08)'; for(let i=0;i<30;i++) { ctx.fillRect(Math.random()*440,Math.random()*440,4,4); }},
+  // 2 - Blood Moon
+  ctx=>{ ctx.fillStyle='#0b0101'; ctx.fillRect(0,0,440,440);
+         const grad = ctx.createRadialGradient(220,220,100,220,220,400);
+         grad.addColorStop(0,'#8B0000'); grad.addColorStop(1,'#000'); ctx.fillStyle=grad; ctx.fillRect(0,0,440,440); },
+  // 3 - Emerald Abyss
+  ctx=>{ ctx.fillStyle='#001a0a'; ctx.fillRect(0,0,440,440);
+         const grad = ctx.createRadialGradient(220,220,0,220,220,320);
+         grad.addColorStop(0,'#00ff9d'); grad.addColorStop(1,'#000'); ctx.fillStyle=grad; ctx.fillRect(0,0,440,440); },
+  // 4 - Cosmic Purple
+  ctx=>{ ctx.fillStyle='#0d001a'; ctx.fillRect(0,0,440,440);
+         const grad = ctx.createRadialGradient(220,220,0,220,220,350);
+         grad.addColorStop(0,'#9d00ff'); grad.addColorStop(1,'#000'); ctx.fillStyle=grad; ctx.fillRect(0,0,440,440); },
+  // 5 - Ancient Runes
+  ctx=>{ ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,0,440,440);
+         ctx.strokeStyle='rgba(212,175,55,0.3)'; ctx.lineWidth=3;
+         for(let i=0;i<15;i++){ ctx.beginPath(); ctx.moveTo(Math.random()*440,Math.random()*440); ctx.lineTo(Math.random()*440,Math.random()*440); ctx.stroke(); }},
+  // 6 - Inferno
+  ctx=>{ const grad = ctx.createLinearGradient(0,0,440,440);
+         grad.addColorStop(0,'#ff4500'); grad.addColorStop(0.5,'#8B0000'); grad.addColorStop(1,'#000');
+         ctx.fillStyle=grad; ctx.fillRect(0,0,440,440); },
+  // 7 - Sacred Light
+  ctx=>{ ctx.fillStyle='#111'; ctx.fillRect(0,0,440,440);
+         const grad = ctx.createRadialGradient(220,220,0,220,220,400);
+         grad.addColorStop(0,'#fff'); grad.addColorStop(0.3,'#d4af37'); grad.addColorStop(1,'#000');
+         ctx.fillStyle=grad; ctx.fillRect(0,0,440,440); }
+];
+
+const logoImg = new Image();
+logoImg.src = "https://i.imgur.com/2q2i1z.png"; // logo asli kamu
+
+function regenerate(){
+  if(!originalImage) return;
+  
+  const canvas = document.createElement('canvas');
+  canvas.width = 440; canvas.height = 440;
+  const ctx = canvas.getContext('2d');
+  
+  // Random ritual
+  const ritualId = Math.floor(Math.random() * rituals.length);
+  rituals[ritualId](ctx);
+  
+  // Draw uploaded image (centered + fit)
+  const ratio = Math.min(380 / originalImage.width, 380 / originalImage.height);
+  const w = originalImage.width * ratio;
+  const h = originalImage.height * ratio;
+  ctx.drawImage(originalImage, 220 - w/2, 220 - h/2, w, h);
+  
+  // Always draw the exact ritual logo (with random opacity & slight rotation for variety)
+  ctx.globalAlpha = 0.12 + Math.random()*0.18;
+  ctx.translate(220,220);
+  ctx.rotate((Math.random()-0.5)*0.2);
+  ctx.drawImage(logoImg, -210, -210, 420, 420);
+  ctx.setTransform(1,0,0,1,0,0);
+  
+  // Gold border glow
+  ctx.globalAlpha = 1;
+  ctx.strokeStyle = '#d4af37';
+  ctx.lineWidth = 14;
+  ctx.shadowColor = '#d4af37';
+  ctx.shadowBlur = 40;
+  ctx.strokeRect(10,10,420,420);
+  
+  document.getElementById('output').src = canvas.toDataURL('image/png');
+  document.getElementById('previewContainer').style.display = 'block';
+}
+
+function downloadImage(){
+  const a = document.createElement('a');
+  a.href = document.getElementById('output').src;
+  a.download = 'ritual-pfp.png';
+  a.click();
+}
+</script>
 </body>
 </html>
