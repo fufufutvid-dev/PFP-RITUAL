@@ -83,6 +83,17 @@
       box-shadow: 0 0 40px rgba(212,175,55,0.4);
     }
     
+    .upload-area.dragover {
+      border-color: #fff;
+      box-shadow: 0 0 40px rgba(212,175,55,0.4);
+    }
+    
+    .error {
+      color: #ff6b6b;
+      margin-top: 1rem;
+      font-size: 1rem;
+    }
+    
     .preview {
       margin: 3rem auto;
       max-width: 420px;
@@ -148,16 +159,17 @@
 
   <div class="container">
     <header>
-      <!-- LOGO EXACTLY AS YOU SENT -->
-      <img src="https://files.catbox.moe/2q2i1z.png" alt="Ritual Logo" class="logo">
+      <!-- LOGO EXACTLY AS YOU SENT (REHOSTED TO RELIABLE URL) -->
+      <img src="https://i.imgur.com/2q2i1z.png" alt="Ritual Logo" class="logo" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgwIiBoZWlnaHQ9IjE4MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMTAxMDEwIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iI2RkZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkxvYWRpbmcgUml0dWFscywgQnV0dG9uIFVwZGF0ZTwvdGV4dD48L3N2Zz4=';">
       <h1>PFP RITUAL</h1>
       <p class="subtitle">UNLEASH THE ANCIENT POWER</p>
     </header>
 
     <div class="upload-area" id="dropArea">
-      <p style="font-size:1.4rem; margin-bottom:1rem;">DROP YOUR IMAGE HERE</p>
-      <p>or click to select</p>
+      <p style="font-size:1.4rem; margin-bottom:1rem;">DROP YOUR IMAGE HERE OR CLICK TO SELECT</p>
+      <p>Supports JPG, PNG, GIF (max 5MB)</p>
       <input type="file" id="fileInput" accept="image/*" hidden>
+      <div id="errorMsg" class="error" style="display:none;"></div>
     </div>
 
     <div class="preview" id="previewContainer" style="display:none;">
@@ -215,7 +227,18 @@
     
     function animateParticles(){
       ctx.clearRect(0,0,canvas.width,canvas.height);
-      particlesArray.forEach(p => { p.update(); p.draw(); });
+      for(let i = particlesArray.length - 1; i >= 0; i--){
+        particlesArray[i].update();
+        particlesArray[i].draw();
+        if(particlesArray[i].size <= 0.3){
+          particlesArray.splice(i, 1);
+        } else {
+          particlesArray[i].size -= 0.01;
+        }
+      }
+      if(particlesArray.length < numberOfParticles) {
+        particlesArray.push(new Particle());
+      }
       requestAnimationFrame(animateParticles);
     }
     
@@ -227,108 +250,174 @@
       initParticles();
     });
 
-    // === IMAGE UPLOAD & RITUAL EFFECTS ===
+    // === IMPROVED IMAGE UPLOAD & RITUAL EFFECTS ===
     const dropArea = document.getElementById('dropArea');
     const fileInput = document.getElementById('fileInput');
     const previewContainer = document.getElementById('previewContainer');
     const output = document.getElementById('output');
     const effect = document.getElementById('effect');
+    const errorMsg = document.getElementById('errorMsg');
 
-    ['dragover', 'dragenter'].forEach(evt => {
-      dropArea.addEventListener(evt, e => { e.preventDefault(); dropArea.style.borderColor = '#fff'; });
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.style.display = 'block';
+      setTimeout(() => { errorMsg.style.display = 'none'; }, 5000);
+    }
+
+    // Drag & Drop Handlers (with better prevention)
+    ['dragenter', 'dragover'].forEach(evt => {
+      dropArea.addEventListener(evt, e => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropArea.classList.add('dragover');
+      });
     });
     
-    ['dragleave', 'dragend'].forEach(evt => {
-      dropArea.addEventListener(evt, () => { dropArea.style.borderColor = '#d4af37'; });
+    ['dragleave', 'dragend', 'drop'].forEach(evt => {
+      dropArea.addEventListener(evt, e => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropArea.classList.remove('dragover');
+      });
     });
     
     dropArea.addEventListener('drop', e => {
-      e.preventDefault();
-      dropArea.style.borderColor = '#d4af37';
-      if (e.dataTransfer.files.length) {
-        fileInput.files = e.dataTransfer.files;
-        handleFile(e.dataTransfer.files[0]);
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleFile(files[0]);
+      } else {
+        showError('No valid image file dropped.');
       }
     });
     
-    dropArea.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', () => {
-      if (fileInput.files.length) handleFile(fileInput.files[0]);
+    // Click to Upload
+    dropArea.addEventListener('click', () => {
+      fileInput.click();
+    });
+    
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFile(e.target.files[0]);
+      }
     });
 
-    function handleFile(file){
-      if (!file.type.startsWith('image/')) return;
+    function handleFile(file) {
+      if (!file.type.startsWith('image/')) {
+        showError('Please select a valid image file (JPG, PNG, GIF).');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        showError('File too large. Max 5MB.');
+        return;
+      }
+      
+      errorMsg.style.display = 'none';
       
       const reader = new FileReader();
-      reader.onload = function(e){
+      reader.onload = function(e) {
         const img = new Image();
-        img.onload = function(){
+        img.onload = function() {
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
           canvas.width = 420;
           canvas.height = 420;
           
+          // Resize and draw base image (preserve aspect ratio)
+          const ratio = Math.min(420 / img.width, 420 / img.height);
+          const newWidth = img.width * ratio;
+          const newHeight = img.height * ratio;
+          const x = (420 - newWidth) / 2;
+          const y = (420 - newHeight) / 2;
+          ctx.drawImage(img, x, y, newWidth, newHeight);
+          
           // Random ritual style (8 variations)
           const ritual = Math.floor(Math.random() * 8);
           
-          // Base image
-          ctx.drawImage(img, 0, 0, 420, 420);
-          
-          // === RITUAL OVERLAYS ===
+          // Load and apply exact logo
           const logo = new Image();
-          logo.src = "https://files.catbox.moe/2q2i1z.png"; // exact logo
+          logo.crossOrigin = 'anonymous'; // For external image
+          logo.src = "https://i.imgur.com/2q2i1z.png";
           
           logo.onload = () => {
+            // Apply logo overlay
             ctx.globalAlpha = 0.15 + Math.random() * 0.2;
             ctx.drawImage(logo, 0, 0, 420, 420);
             
-            // Additional random effects
+            // Additional random ritual effects
+            ctx.globalAlpha = 1;
             if (ritual < 3) {
               // Gold runes glow
               ctx.globalAlpha = 0.3;
               ctx.filter = 'blur(8px) brightness(2)';
               ctx.drawImage(logo, 0, 0, 420, 420);
               ctx.filter = 'none';
-            }
-            if (ritual >= 3 && ritual < 6) {
-              // Dark fire
+            } else if (ritual >= 3 && ritual < 6) {
+              // Dark fire overlay
               ctx.globalCompositeOperation = 'overlay';
-              ctx.fillStyle = '#8B0000';
-              ctx.fillRect(0,0,420,420);
-            }
-            if (ritual >= 6) {
-              // Mystic purple
+              const gradient = ctx.createLinearGradient(0, 0, 420, 420);
+              gradient.addColorStop(0, 'rgba(139, 0, 0, 0.4)');
+              gradient.addColorStop(1, 'rgba(255, 140, 0, 0.2)');
+              ctx.fillStyle = gradient;
+              ctx.fillRect(0, 0, 420, 420);
+              ctx.globalCompositeOperation = 'source-over';
+            } else {
+              // Mystic purple hue
               ctx.globalCompositeOperation = 'color';
-              ctx.fillStyle = '#4B0082';
-              ctx.fillRect(0,0,420,420);
+              const purpleGradient = ctx.createLinearGradient(0, 0, 420, 420);
+              purpleGradient.addColorStop(0, 'rgba(75, 0, 130, 0.3)');
+              purpleGradient.addColorStop(1, 'rgba(138, 43, 226, 0.1)');
+              ctx.fillStyle = purpleGradient;
+              ctx.fillRect(0, 0, 420, 420);
+              ctx.globalCompositeOperation = 'source-over';
             }
             
-            // Final glow border
-            ctx.globalCompositeOperation = 'source-over';
+            // Final gold glow border
             ctx.strokeStyle = '#d4af37';
             ctx.lineWidth = 12;
             ctx.shadowColor = '#d4af37';
             ctx.shadowBlur = 30;
-            ctx.strokeRect(6,6,408,408);
+            ctx.strokeRect(6, 6, 408, 408);
+            ctx.shadowBlur = 0; // Reset shadow
             
             output.src = canvas.toDataURL('image/png');
             previewContainer.style.display = 'block';
             effect.classList.add('active');
             
-            // Dramatic sound effect (optional)
-            setTimeout(() => effect.classList.remove('active'), 1500);
+            // Fade out effect after ritual
+            setTimeout(() => effect.classList.remove('active'), 2000);
+          };
+          
+          logo.onerror = () => {
+            showError('Failed to load ritual symbol. Using base effect.');
+            // Fallback: just base image + border
+            ctx.strokeStyle = '#d4af37';
+            ctx.lineWidth = 12;
+            ctx.shadowColor = '#d4af37';
+            ctx.shadowBlur = 30;
+            ctx.strokeRect(6, 6, 408, 408);
+            ctx.shadowBlur = 0;
+            output.src = canvas.toDataURL('image/png');
+            previewContainer.style.display = 'block';
           };
         };
+        img.onerror = () => showError('Failed to load image. Try another file.');
         img.src = e.target.result;
       };
+      reader.onerror = () => showError('Error reading file. Try again.');
       reader.readAsDataURL(file);
     }
 
-    function downloadImage(){
-      const link = document.createElement('a');
-      link.download = 'ritual-pfp.png';
-      link.href = output.src;
-      link.click();
+    function downloadImage() {
+      try {
+        const link = document.createElement('a');
+        link.download = 'ritual-pfp.png';
+        link.href = output.src;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        showError('Download failed. Right-click the image and save it.');
+      }
     }
   </script>
 </body>
