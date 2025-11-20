@@ -1,56 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>PFP RITUAL GENERATOR</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@900&family=Orbitron:wght@500;800&display=swap');
-    
-    :root { --gold: #d4af37; --dark: #0c0c0c; --glow: #d4af3799; }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { background:#000; color:#eee; font-family:'Orbitron',sans-serif; min-height:100vh; overflow-x:hidden; position:relative; }
-    canvas#particles { position:fixed; top:0; left:0; width:100%; height:100%; z-index:1; pointer-events:none; }
-    
-    .container { position:relative; z-index:2; max-width:1100px; margin:0 auto; padding:2rem; text-align:center; }
-    header { margin-bottom:4rem; padding-top:3rem; }
-    .logo { width:180px; height:180px; filter:drop-shadow(0 0 30px var(--glow)); margin-bottom:1.5rem; }
-    h1 { font-family:'Cinzel Decorative',cursive; font-size:4.5rem; background:linear-gradient(90deg,#d4af37,#fff,#d4af37); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow:0 0 40px var(--glow); letter-spacing:8px; }
-    .subtitle { font-size:1.2rem; opacity:0.8; margin-top:1rem; letter-spacing:4px; }
-    
-    .upload-area { background:rgba(20,20,20,0.6); border:2px dashed var(--gold); border-radius:20px; padding:3rem; margin:3rem auto; max-width:500px; cursor:pointer; transition:all .4s; backdrop-filter:blur(10px); }
-    .upload-area:hover, .upload-area.dragover { border-color:#fff; box-shadow:0 0 40px rgba(212,175,55,0.4); }
-    
-    .preview { margin:3rem auto; max-width:440px; }
-    .preview img { width:100%; border-radius:20px; box-shadow:0 0 60px rgba(212,175,55,0.6); }
-    button { background:linear-gradient(45deg,#d4af37,#ffd700); color:#000; border:none; padding:1rem 3rem; font-size:1.3rem; font-weight:bold; border-radius:50px; cursor:pointer; margin:2rem; box-shadow:0 10px 30px rgba(212,175,55,0.4); transition:all .3s; }
-    button:hover { transform:translateY(-5px); box-shadow:0 20px 40px rgba(212,175,55,0.6); }
-    
-    .credit { position:fixed; bottom:20px; left:50%; transform:translateX(-50%); font-size:0.9rem; opacity:0.6; }
-    .credit a { color:var(--gold); text-decoration:none; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PFP RITUAL GENERATOR</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@900&family=Orbitron:wght@500&display=swap');
+  :root {--gold:#d4af37;--dark:#000;}
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--dark);color:#eee;font-family:'Orbitron',sans-serif;min-height:100vh;text-align:center;overflow-x:hidden;}
+  canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;}
+  .container{position:relative;z-index:2;padding:2rem;}
+  .logo{width:180px;height:180px;filter:drop-shadow(0 0 30px #d4af3799);margin:20px auto;}
+  h1{font-family:'Cinzel Decorative',cursive;font-size:4.5rem;background:linear-gradient(90deg,#d4af37,#fff,#d4af37);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:8px;}
+  .upload{background:rgba(30,30,30,0.8);border:3px dashed var(--gold);border-radius:20px;padding:50px;margin:40px auto;max-width:500px;cursor:pointer;transition:.4s;}
+  .upload:hover{border-color:#fff;box-shadow:0 0 50px rgba(212,175,55,0.5);}
+  .preview{margin:40px auto;max-width:460px;display:none;}
+  .preview img{width:100%;border-radius:20px;box-shadow:0 0 70px rgba(212,175,55,0.7);}
+  button{background:linear-gradient(45deg,#d4af37,#ffd700);color:#000;border:none;padding:15px 40px;margin:15px;font-size:1.3rem;border-radius:50px;cursor:pointer;font-weight:bold;}
+  button:hover{transform:translateY(-5px);box-shadow:0 15px 40px rgba(212,175,55,0.6);}
+  .credit{position:fixed;bottom:15px;left:50%;transform:translateX(-50%);opacity:0.7;font-size:0.9rem;}
+  .credit a{color:var(--gold);text-decoration:none;}
+</style>
 </head>
 <body>
 
 <canvas id="particles"></canvas>
 
 <div class="container">
-  <header>
-    <img src="https://i.imgur.com/2q2i1z.png" alt="Ritual Logo" class="logo">
-    <h1>PFP RITUAL</h1>
-    <p class="subtitle">UNLEASH THE ANCIENT POWER</p>
-  </header>
+  <img src="https://i.imgur.com/2q2i1z.png" class="logo" alt="Ritual Logo">
+  <h1>PFP RITUAL</h1>
+  <p style="letter-spacing:4px;margin:20px;">UNLEASH THE ANCIENT POWER</p>
 
-  <div class="upload-area" id="dropArea">
-    <p style="font-size:1.4rem; margin-bottom:1rem;">DROP YOUR IMAGE OR CLICK TO UPLOAD</p>
-    <input type="file" id="fileInput" accept="image/*" hidden>
+  <div class="upload" id="upload">
+    <p style="font-size:1.5rem;margin-bottom:10px;">CLICK OR DROP YOUR PHOTO HERE</p>
+    <p>PNG / JPG / GIF • Max 10MB</p>
+    <input type="file" id="file" accept="image/*" style="display:none;">
   </div>
 
-  <div class="preview" id="previewContainer" style="display:none;">
-    <img id="output" src="" alt="Ritualized PFP"/>
-    <br/>
-    <button onclick="downloadImage()">DOWNLOAD RITUALIZED PFP</button>
-    <button onclick="regenerate()">REGENERATE WITH NEW RITUAL</button>
+  <div class="preview" id="result">
+    <img id="output" src="" alt="Your Ritual PFP">
+    <br>
+    <button onclick="download()">DOWNLOAD PFP</button>
+    <button onclick="applyRitual()">NEW RITUAL STYLE</button>
   </div>
 
   <div class="credit">
@@ -60,133 +52,97 @@
 
 <script>
 // Particles
-const canvas = document.getElementById('particles');
-const ctx = canvas.getContext('2d');
-canvas.width = innerWidth; canvas.height = innerHeight;
+const c = document.getElementById('particles');
+const ctx = c.getContext('2d');
+c.width = innerWidth; c.height = innerHeight;
 let particles = [];
-for(let i=0;i<80;i++){
-  particles.push({
-    x:Math.random()*canvas.width,
-    y:Math.random()*canvas.height,
-    size:Math.random()*3+0.5,
-    speedX:Math.random()*0.6-0.3,
-    speedY:Math.random()*0.6-0.3
-  });
+for(let i=0;i<90;i++){
+  particles.push({x:Math.random()*c.width,y:Math.random()*c.height,vx:Math.random()*0.8-0.4,vy:Math.random()*0.8-0.4,r:Math.random()*2+1});
 }
-function drawParticles(){
-  ctx.clearRect(0,0,canvas.width,canvas.height);
+function anim(){
+  ctx.clearRect(0,0,c.width,c.height);
   particles.forEach(p=>{
-    p.x += p.speedX; p.y += p.speedY;
-    if(p.x<0||p.x>canvas.width) p.speedX*=-1;
-    if(p.y<0||p.y>canvas.height) p.speedY*=-1;
-    ctx.fillStyle='rgba(212,175,55,0.6)'; ctx.beginPath(); ctx.arc(p.x,p.y,p.size,0,Math.PI*2); ctx.fill();
+    p.x+=p.vx; p.y+=p.vy;
+    if(p.x<0||p.x>c.width) p.vx*=-1;
+    if(p.y<0||p.y>c.height) p.vy*=-1;
+    ctx.fillStyle='rgba(212,175,55,0.7)'; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
   });
-  requestAnimationFrame(drawParticles);
+  requestAnimationFrame(anim);
 }
-drawParticles();
-window.addEventListener('resize',()=>{canvas.width=innerWidth;canvas.height=innerHeight;});
+anim();
+window.addEventListener('resize',()=>{c.width=innerWidth;c.height=innerHeight;});
 
-// Upload
-const dropArea = document.getElementById('dropArea');
-const fileInput = document.getElementById('fileInput');
-let originalImage = null;
+// Upload & Process
+let userImage = null;
+const uploadDiv = document.getElementById('upload');
+const fileInput = document.getElementById('file');
+const result = document.getElementById('result');
+const output = document.getElementById('output');
 
-dropArea.onclick = () => fileInput.click();
-fileInput.onchange = e => { if(e.target.files[0]) processFile(e.target.files[0]); };
+uploadDiv.onclick = () => fileInput.click();
+fileInput.onchange = () => {
+  const file = fileInput.files[0];
+  if(file && file.type.startsWith('image/')){
+    const reader = new FileReader();
+    reader.onload = e => {
+      userImage = new Image();
+      userImage.onload = () => { applyRitual(); };
+      userImage.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+};
 
-dropArea.ondragover = dropArea.ondragenter = e => {e.preventDefault(); dropArea.classList.add('dragover');};
-dropArea.ondragleave = dropArea.ondragend = () => dropArea.classList.remove('dragover');
-dropArea.ondrop = e => {e.preventDefault(); dropArea.classList.remove('dragover'); if(e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]);};
-
-function processFile(file){
-  if(!file.type.startsWith('image/')) return alert('Please upload an image');
-  const reader = new FileReader();
-  reader.onload = e => {
-    const img = new Image();
-    img.onload = () => { originalImage = img; regenerate(); };
-    img.src = e.target.result;
-  };
-  reader.readAsDataURL(file);
-}
-
-// 8 Epic Ritual Backgrounds (logo selalu ada)
-const rituals = [
-  // 0 - Pure Gold Temple
-  ctx=>{ ctx.fillStyle='#1a1408'; ctx.fillRect(0,0,440,440);
-         const grad = ctx.createRadialGradient(220,220,0,220,220,300);
-         grad.addColorStop(0,'#d4af37'); grad.addColorStop(1,'#0f0a03'); ctx.fillStyle=grad; ctx.fillRect(0,0,440,440); },
-  // 1 - Obsidian Void
-  ctx=>{ ctx.fillStyle='#000'; ctx.fillRect(0,0,440,440);
-         ctx.fillStyle='rgba(212,175,55,0.08)'; for(let i=0;i<30;i++) { ctx.fillRect(Math.random()*440,Math.random()*440,4,4); }},
-  // 2 - Blood Moon
-  ctx=>{ ctx.fillStyle='#0b0101'; ctx.fillRect(0,0,440,440);
-         const grad = ctx.createRadialGradient(220,220,100,220,220,400);
-         grad.addColorStop(0,'#8B0000'); grad.addColorStop(1,'#000'); ctx.fillStyle=grad; ctx.fillRect(0,0,440,440); },
-  // 3 - Emerald Abyss
-  ctx=>{ ctx.fillStyle='#001a0a'; ctx.fillRect(0,0,440,440);
-         const grad = ctx.createRadialGradient(220,220,0,220,220,320);
-         grad.addColorStop(0,'#00ff9d'); grad.addColorStop(1,'#000'); ctx.fillStyle=grad; ctx.fillRect(0,0,440,440); },
-  // 4 - Cosmic Purple
-  ctx=>{ ctx.fillStyle='#0d001a'; ctx.fillRect(0,0,440,440);
-         const grad = ctx.createRadialGradient(220,220,0,220,220,350);
-         grad.addColorStop(0,'#9d00ff'); grad.addColorStop(1,'#000'); ctx.fillStyle=grad; ctx.fillRect(0,0,440,440); },
-  // 5 - Ancient Runes
-  ctx=>{ ctx.fillStyle='#0a0a0a'; ctx.fillRect(0,0,440,440);
-         ctx.strokeStyle='rgba(212,175,55,0.3)'; ctx.lineWidth=3;
-         for(let i=0;i<15;i++){ ctx.beginPath(); ctx.moveTo(Math.random()*440,Math.random()*440); ctx.lineTo(Math.random()*440,Math.random()*440); ctx.stroke(); }},
-  // 6 - Inferno
-  ctx=>{ const grad = ctx.createLinearGradient(0,0,440,440);
-         grad.addColorStop(0,'#ff4500'); grad.addColorStop(0.5,'#8B0000'); grad.addColorStop(1,'#000');
-         ctx.fillStyle=grad; ctx.fillRect(0,0,440,440); },
-  // 7 - Sacred Light
-  ctx=>{ ctx.fillStyle='#111'; ctx.fillRect(0,0,440,440);
-         const grad = ctx.createRadialGradient(220,220,0,220,220,400);
-         grad.addColorStop(0,'#fff'); grad.addColorStop(0.3,'#d4af37'); grad.addColorStop(1,'#000');
-         ctx.fillStyle=grad; ctx.fillRect(0,0,440,440); }
+// 8 Epic Backgrounds
+const backgrounds = [
+  ()=>{ctx.fillStyle='#111';ctx.fillRect(0,0,460,460);const g=ctx.createRadialGradient(230,230,0,230,230,300);g.addColorStop(0,'#d4af37');g.addColorStop(1,'#000');ctx.fillStyle=g;ctx.fillRect(0,0,460,460);}, // Gold Temple
+  ()=>{ctx.fillStyle='#000';ctx.fillRect(0,0,460,460);}, // Pure Black
+  ()=>{ctx.fillStyle='#0b0101';ctx.fillRect(0,0,460,460);const g=ctx.createRadialGradient(230,230,100,230,230,400);g.addColorStop(0,'#8B0000');g.addColorStop(1,'#000');ctx.fillStyle=g;ctx.fillRect(0,0,460,460);}, // Blood Moon
+  ()=>{ctx.fillStyle='#001a0a';ctx.fillRect(0,0,460,460);const g=ctx.createRadialGradient(230,230,0,230,230,320);g.addColorStop(0,'#00ff9d');g.addColorStop(1,'#000');ctx.fillStyle=g;ctx.fillRect(0,0,460,460);}, // Emerald
+  ()=>{ctx.fillStyle='#0d001a';ctx.fillRect(0,0,460,460);const g=ctx.createRadialGradient(230,230,0,230,230,350);g.addColorStop(0,'#9d00ff');g.addColorStop(1,'#000');ctx.fillStyle=g;ctx.fillRect(0,0,460,460);}, // Purple Void
+  ()=>{ctx.fillStyle='#000';ctx.fillRect(0,0,460,460);for(let i=0;i<40;i++){ctx.fillStyle='rgba(212,175,55,0.15)';ctx.fillRect(Math.random()*460,Math.random()*460,3,3);}}, // Star Dust
+  ()=>{const g=ctx.createLinearGradient(0,0,460,460);g.addColorStop(0,'#ff4500');g.addColorStop(0.5,'#8B0000');g.addColorStop(1,'#000');ctx.fillStyle=g;ctx.fillRect(0,0,460,460);}, // Inferno
+  ()=>{ctx.fillStyle='#111';ctx.fillRect(0,0,460,460);const g=ctx.createRadialGradient(230,230,0,230,230,400);g.addColorStop(0,'#ffffff');g.addColorStop(0.4,'#d4af37');g.addColorStop(1,'#000');ctx.fillStyle=g;ctx.fillRect(0,0,460,460);} // Sacred Light
 ];
 
-const logoImg = new Image();
-logoImg.src = "https://i.imgur.com/2q2i1z.png"; // logo asli kamu
+const ritualLogo = new Image();
+ritualLogo.src = "https://i.imgur.com/2q2i1z.png";
 
-function regenerate(){
-  if(!originalImage) return;
-  
+function applyRitual(){
+  if(!userImage) return;
   const canvas = document.createElement('canvas');
-  canvas.width = 440; canvas.height = 440;
+  canvas.width = 460; canvas.height = 460;
   const ctx = canvas.getContext('2d');
-  
-  // Random ritual
-  const ritualId = Math.floor(Math.random() * rituals.length);
-  rituals[ritualId](ctx);
-  
-  // Draw uploaded image (centered + fit)
-  const ratio = Math.min(380 / originalImage.width, 380 / originalImage.height);
-  const w = originalImage.width * ratio;
-  const h = originalImage.height * ratio;
-  ctx.drawImage(originalImage, 220 - w/2, 220 - h/2, w, h);
-  
-  // Always draw the exact ritual logo (with random opacity & slight rotation for variety)
-  ctx.globalAlpha = 0.12 + Math.random()*0.18;
-  ctx.translate(220,220);
-  ctx.rotate((Math.random()-0.5)*0.2);
-  ctx.drawImage(logoImg, -210, -210, 420, 420);
-  ctx.setTransform(1,0,0,1,0,0);
-  
-  // Gold border glow
+
+  // Random background
+  backgrounds[Math.floor(Math.random()*backgrounds.length)]();
+
+  // Draw user photo (fit & center)
+  const scale = Math.max(400 / userImage.width, 400 / userImage.height);
+  const w = userImage.width * scale;
+  const h = userImage.height * scale;
+  ctx.drawImage(userImage, 230 - w/2, 230 - h/2, w, h);
+
+  // Always apply exact ritual logo
+  ctx.globalAlpha = 0.15 + Math.random()*0.15;
+  ctx.drawImage(ritualLogo, 0, 0, 460, 460);
+
+  // Gold border
   ctx.globalAlpha = 1;
   ctx.strokeStyle = '#d4af37';
-  ctx.lineWidth = 14;
+  ctx.lineWidth = 16;
   ctx.shadowColor = '#d4af37';
-  ctx.shadowBlur = 40;
-  ctx.strokeRect(10,10,420,420);
-  
-  document.getElementById('output').src = canvas.toDataURL('image/png');
-  document.getElementById('previewContainer').style.display = 'block';
+  ctx.shadowBlur = 50;
+  ctx.strokeRect(12, 12, 436, 436);
+
+  output.src = canvas.toDataURL('image/png');
+  result.style.display = 'block';
+  uploadDiv.style.display = 'none';
 }
 
-function downloadImage(){
+function download(){
   const a = document.createElement('a');
-  a.href = document.getElementById('output').src;
+  a.href = output.src;
   a.download = 'ritual-pfp.png';
   a.click();
 }
