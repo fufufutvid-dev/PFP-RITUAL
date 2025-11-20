@@ -1,429 +1,720 @@
-import React, { useState, useRef } from 'react';
-import { Upload, Download, Wand2, RotateCcw } from 'lucide-react';
-
-export default function RitualPFPGenerator() {
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [generatedImages, setGeneratedImages] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const canvasRef = useRef(null);
-  const fileInputRef = useRef(null);
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setUploadedImage(event.target.result);
-        setGeneratedImages([]);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const drawRitualLogo = (ctx, x, y, size, rotation, opacity, color) => {
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(rotation);
-    ctx.globalAlpha = opacity;
-
-    const scale = size / 400;
-    ctx.scale(scale, scale);
-
-    // Main ritual logo - complex interlocking pattern
-    ctx.fillStyle = color;
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2 / scale;
-
-    // Top diamond
-    ctx.fillRect(-30, -130, 60, 60);
-    ctx.fillRect(-50, -160, 20, 20);
-    ctx.fillRect(30, -160, 20, 20);
-
-    // Upper left section
-    ctx.fillRect(-140, -60, 60, 60);
-    ctx.fillRect(-120, -40, 20, 20);
-    ctx.fillRect(-120, -80, 20, 20);
-
-    // Upper right section
-    ctx.fillRect(80, -60, 60, 60);
-    ctx.fillRect(100, -40, 20, 20);
-    ctx.fillRect(100, -80, 20, 20);
-
-    // Middle left
-    ctx.fillRect(-100, 20, 60, 60);
-    ctx.fillRect(-80, 40, 20, 20);
-    ctx.fillRect(-80, 0, 20, 20);
-
-    // Center
-    ctx.fillRect(-30, 50, 60, 60);
-    ctx.fillRect(-10, 70, 20, 20);
-    ctx.fillRect(-50, 70, 20, 20);
-
-    // Middle right
-    ctx.fillRect(40, 20, 60, 60);
-    ctx.fillRect(60, 40, 20, 20);
-    ctx.fillRect(60, 0, 20, 20);
-
-    // Bottom sections
-    ctx.fillRect(-120, 130, 60, 60);
-    ctx.fillRect(-100, 150, 20, 20);
-
-    ctx.fillRect(60, 130, 60, 60);
-    ctx.fillRect(80, 150, 20, 20);
-
-    // Bottom center
-    ctx.fillRect(-30, 180, 60, 60);
-
-    ctx.restore();
-  };
-
-  const generateRitualEffects = async () => {
-    if (!uploadedImage) return;
-    setIsLoading(true);
-
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-
-    img.onload = () => {
-      const variations = [];
-
-      for (let i = 0; i < 4; i++) {
-        canvas.width = 512;
-        canvas.height = 512;
-
-        // Draw base image
-        ctx.drawImage(img, 0, 0, 512, 512);
-
-        // Apply different ritual effects with logo overlay
-        switch (i) {
-          case 0:
-            applyGlitchEffect(ctx, canvas);
-            break;
-          case 1:
-            applyArcaneCircles(ctx, canvas);
-            break;
-          case 2:
-            applyShadowRitual(ctx, canvas);
-            break;
-          case 3:
-            applyEnergyAura(ctx, canvas);
-            break;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ritual PFP Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        variations.push(canvas.toDataURL('image/png'));
-      }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000;
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-      setGeneratedImages(variations);
-    };
+        /* Animated Background */
+        .bg-container {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+        }
 
-    img.src = uploadedImage;
-    setTimeout(() => setIsLoading(false), 800);
-  };
+        .bg-gradient {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #2a0845 0%, #000 50%, #000 100%);
+            opacity: 0.6;
+        }
 
-  const applyGlitchEffect = (ctx, canvas) => {
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
+        .glow-1 {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.2), transparent);
+            border-radius: 50%;
+            top: -100px;
+            left: 25%;
+            filter: blur(80px);
+            animation: pulse 6s ease-in-out infinite;
+        }
 
-    for (let i = 0; i < data.length; i += 4) {
-      const rand = Math.random();
-      if (rand > 0.98) {
-        data[i] = Math.random() * 255;
-        data[i + 1] = Math.random() * 255;
-        data[i + 2] = Math.random() * 255;
-      }
-    }
+        .glow-2 {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.2), transparent);
+            border-radius: 50%;
+            bottom: -100px;
+            right: 25%;
+            filter: blur(80px);
+            animation: pulse 6s ease-in-out infinite 1s;
+        }
 
-    ctx.putImageData(imageData, 0, 0);
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.1; }
+            50% { transform: scale(1.1); opacity: 0.15; }
+        }
 
-    // Add glitch lines
-    for (let j = 0; j < 20; j++) {
-      const y = Math.random() * canvas.height;
-      const h = Math.random() * 20;
-      ctx.fillStyle = `rgba(255, 0, 0, ${Math.random() * 0.3})`;
-      ctx.fillRect(0, y, canvas.width, h);
-    }
+        /* Header */
+        .header {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 60px 20px 40px;
+        }
 
-    // Draw ritual logo with white glow
-    ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
-    ctx.shadowBlur = 20;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-    drawRitualLogo(ctx, 256, 256, 180, 0, 0.9, 'rgba(255, 255, 255, 0.8)');
-    
-    // Second layer with red tint
-    drawRitualLogo(ctx, 256, 256, 180, Math.random() * 0.1, 0.3, 'rgba(255, 0, 0, 0.5)');
-  };
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            opacity: 0.95;
+        }
 
-  const applyArcaneCircles = (ctx, canvas) => {
-    // Create circular overlay
-    const gradient = ctx.createRadialGradient(256, 256, 0, 256, 256, 400);
-    gradient.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
-    gradient.addColorStop(0.7, 'rgba(138, 43, 226, 0.15)');
-    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
+        h1 {
+            font-size: 48px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #c084fc, #ec4899, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
 
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+        .subtitle {
+            color: #a78bfa;
+            font-size: 18px;
+            font-weight: 300;
+            letter-spacing: 3px;
+        }
 
-    // Draw concentric circles
-    ctx.strokeStyle = 'rgba(138, 43, 226, 0.6)';
-    ctx.lineWidth = 2;
-    for (let i = 50; i < 300; i += 40) {
-      ctx.beginPath();
-      ctx.arc(256, 256, i, 0, Math.PI * 2);
-      ctx.stroke();
-    }
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px 60px;
+        }
 
-    // Draw ritual logo in center with purple glow
-    ctx.shadowColor = 'rgba(138, 43, 226, 0.9)';
-    ctx.shadowBlur = 30;
-    drawRitualLogo(ctx, 256, 256, 200, 0, 0.85, 'rgba(138, 43, 226, 0.9)');
-    
-    // Add white overlay layer
-    ctx.shadowColor = 'transparent';
-    drawRitualLogo(ctx, 256, 256, 200, 0, 0.3, 'rgba(255, 255, 255, 0.6)');
-  };
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 48px;
+        }
 
-  const applyShadowRitual = (ctx, canvas) => {
-    // Darken and add shadow overlay
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
 
-    // Add shadow vignette
-    const vignette = ctx.createRadialGradient(256, 256, 0, 256, 256, 450);
-    vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
-    vignette.addColorStop(1, 'rgba(0, 0, 0, 0.6)');
-    ctx.fillStyle = vignette;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+        /* Card Styles */
+        .card {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
 
-    // Add red border frame
-    ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.rect(20, 20, 472, 472);
-    ctx.stroke();
+        .card:hover {
+            border-color: rgba(168, 85, 247, 0.4);
+            background: rgba(255, 255, 255, 0.08);
+        }
 
-    // Draw ritual logo with red glow
-    ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
-    ctx.shadowBlur = 25;
-    drawRitualLogo(ctx, 256, 256, 190, 0, 0.8, 'rgba(255, 100, 100, 0.9)');
-    
-    // Dark shadow layer
-    ctx.shadowColor = 'transparent';
-    drawRitualLogo(ctx, 256, 256, 190, 0, 0.2, 'rgba(0, 0, 0, 0.8)');
-  };
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed rgba(168, 85, 247, 0.4);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
 
-  const applyEnergyAura = (ctx, canvas) => {
-    // Add energy glow
-    const glow = ctx.createRadialGradient(256, 256, 100, 256, 256, 300);
-    glow.addColorStop(0, 'rgba(0, 255, 255, 0.2)');
-    glow.addColorStop(1, 'rgba(0, 100, 255, 0.1)');
-    ctx.fillStyle = glow;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+        .upload-area:hover {
+            border-color: rgba(168, 85, 247, 1);
+            background: rgba(168, 85, 247, 0.05);
+        }
 
-    // Add energy waves
-    ctx.strokeStyle = 'rgba(0, 255, 255, 0.7)';
-    ctx.lineWidth = 2;
-    for (let i = 0; i < 3; i++) {
-      ctx.beginPath();
-      ctx.arc(256, 256, 120 + i * 40, 0, Math.PI * 2);
-      ctx.stroke();
-    }
+        .upload-area input {
+            display: none;
+        }
 
-    // Add magical particles
-    for (let i = 0; i < 30; i++) {
-      const x = Math.random() * canvas.width;
-      const y = Math.random() * canvas.height;
-      ctx.fillStyle = `rgba(0, 255, 255, ${Math.random() * 0.5})`;
-      ctx.beginPath();
-      ctx.arc(x, y, Math.random() * 3, 0, Math.PI * 2);
-      ctx.fill();
-    }
+        .upload-icon {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 15px;
+            color: #a78bfa;
+        }
 
-    // Draw ritual logo with cyan glow
-    ctx.shadowColor = 'rgba(0, 255, 255, 0.9)';
-    ctx.shadowBlur = 28;
-    drawRitualLogo(ctx, 256, 256, 195, 0, 0.9, 'rgba(0, 255, 255, 0.95)');
-    
-    // Light overlay
-    ctx.shadowColor = 'transparent';
-    drawRitualLogo(ctx, 256, 256, 195, 0, 0.2, 'rgba(255, 255, 255, 0.7)');
-  };
+        .upload-area span {
+            display: block;
+            color: #a78bfa;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
 
-  const downloadImage = (imageData, index) => {
-    const link = document.createElement('a');
-    link.href = imageData;
-    link.download = `ritual-pfp-${index + 1}.png`;
-    link.click();
-  };
+        .upload-area .text-small {
+            color: #888;
+            font-size: 13px;
+        }
 
-  return (
-    <div className="min-h-screen bg-black text-white overflow-hidden">
-      {/* Animated background */}
-      <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-950 via-black to-black opacity-60"></div>
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-600 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-pulse"></div>
-      </div>
+        /* Image Preview */
+        .preview-section {
+            margin-top: 20px;
+        }
 
-      {/* Header */}
-      <div className="relative z-10 pt-16 pb-12 text-center">
-        <div className="mb-4 flex justify-center">
-          <svg className="w-24 h-24" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <g opacity="0.95">
-              {/* Ritual Logo - Interlocking Pattern */}
-              {/* Top diamond */}
-              <rect x="170" y="50" width="60" height="60" fill="white" />
-              <rect x="150" y="30" width="20" height="20" fill="black" />
-              <rect x="230" y="30" width="20" height="20" fill="black" />
+        .preview-label {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 12px;
+            display: block;
+            font-weight: 600;
+        }
 
-              {/* Upper left section */}
-              <rect x="80" y="120" width="60" height="60" fill="white" />
-              <rect x="100" y="140" width="20" height="20" fill="black" />
-              <rect x="100" y="100" width="20" height="20" fill="black" />
+        .preview-img {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            max-height: 300px;
+            object-fit: cover;
+        }
 
-              {/* Upper right section */}
-              <rect x="260" y="120" width="60" height="60" fill="white" />
-              <rect x="280" y="140" width="20" height="20" fill="black" />
-              <rect x="280" y="100" width="20" height="20" fill="black" />
+        /* Buttons */
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
 
-              {/* Middle left */}
-              <rect x="60" y="190" width="60" height="60" fill="white" />
-              <rect x="80" y="210" width="20" height="20" fill="black" />
-              <rect x="80" y="170" width="20" height="20" fill="black" />
+        button {
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
 
-              {/* Center */}
-              <rect x="170" y="190" width="60" height="60" fill="white" />
-              <rect x="190" y="210" width="20" height="20" fill="black" />
-              <rect x="150" y="210" width="20" height="20" fill="black" />
+        .btn-primary {
+            background: linear-gradient(90deg, #a855f7, #ec4899);
+            color: white;
+        }
 
-              {/* Middle right */}
-              <rect x="280" y="190" width="60" height="60" fill="white" />
-              <rect x="300" y="210" width="20" height="20" fill="black" />
-              <rect x="300" y="170" width="20" height="20" fill="black" />
+        .btn-primary:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
+        }
 
-              {/* Bottom left */}
-              <rect x="100" y="260" width="60" height="60" fill="white" />
-              <rect x="120" y="280" width="20" height="20" fill="black" />
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
-              {/* Bottom right */}
-              <rect x="240" y="260" width="60" height="60" fill="white" />
-              <rect x="260" y="280" width="20" height="20" fill="black" />
+        .btn-secondary {
+            border: 1px solid rgba(168, 85, 247, 0.4);
+            color: #a78bfa;
+            background: transparent;
+        }
 
-              {/* Bottom center */}
-              <rect x="170" y="320" width="60" height="60" fill="white" />
-            </g>
-          </svg>
-        </div>
-        <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-600 bg-clip-text text-transparent mb-3">
-          Ritual PFP
-        </h1>
-        <p className="text-purple-300 text-lg font-light tracking-widest">GENERATOR</p>
-      </div>
+        .btn-secondary:hover {
+            border-color: rgba(168, 85, 247, 1);
+            background: rgba(168, 85, 247, 0.1);
+        }
 
-      {/* Main Content */}
-      <div className="relative z-10 max-w-6xl mx-auto px-6 pb-16">
-        <div className="grid md:grid-cols-2 gap-12">
-          {/* Upload Section */}
-          <div className="space-y-6">
-            <div className="backdrop-blur-xl bg-white/5 border border-purple-500/20 rounded-2xl p-8 hover:border-purple-500/40 transition">
-              <label className="block">
-                <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-purple-500/40 rounded-xl cursor-pointer hover:border-purple-500 transition group">
-                  <Upload className="w-12 h-12 text-purple-400 group-hover:text-purple-300 mb-3 transition" />
-                  <span className="text-lg font-semibold text-purple-300">Upload Your Photo</span>
-                  <span className="text-sm text-gray-400 mt-2">or drag and drop</span>
-                  <input
-                    type="file"
-                    className="hidden"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    ref={fileInputRef}
-                  />
-                </div>
-              </label>
-            </div>
+        /* Results Grid */
+        .results-section {
+            margin-top: 20px;
+        }
 
-            {uploadedImage && (
-              <div className="backdrop-blur-xl bg-white/5 border border-purple-500/20 rounded-2xl p-6">
-                <p className="text-sm text-gray-400 mb-3">Original Image</p>
-                <img src={uploadedImage} alt="Uploaded" className="w-full rounded-lg border border-purple-500/30" />
-              </div>
-            )}
+        .results-label {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 15px;
+            display: block;
+            font-weight: 600;
+        }
 
-            {/* Action Buttons */}
-            <div className="space-y-3">
-              <button
-                onClick={generateRitualEffects}
-                disabled={!uploadedImage || isLoading}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-6 rounded-xl transition transform hover:scale-105 flex items-center justify-center gap-2"
-              >
-                <Wand2 className="w-5 h-5" />
-                {isLoading ? 'Generating...' : 'Generate Ritual PFP'}
-              </button>
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
 
-              {generatedImages.length > 0 && (
-                <button
-                  onClick={() => {
-                    setGeneratedImages([]);
-                    setUploadedImage(null);
-                    fileInputRef.current?.click();
-                  }}
-                  className="w-full border border-purple-500/40 hover:border-purple-500 text-purple-300 font-semibold py-3 px-6 rounded-xl transition flex items-center justify-center gap-2"
-                >
-                  <RotateCcw className="w-5 h-5" />
-                  Start Over
-                </button>
-              )}
-            </div>
-          </div>
+        .result-item {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            aspect-ratio: 1;
+            group: true;
+        }
 
-          {/* Generated Results */}
-          <div>
-            {generatedImages.length > 0 ? (
-              <div className="space-y-4">
-                <p className="text-sm text-gray-400 font-semibold">Generated Variations</p>
-                <div className="grid grid-cols-2 gap-4">
-                  {generatedImages.map((img, idx) => (
-                    <div key={idx} className="group backdrop-blur-xl bg-white/5 border border-purple-500/20 rounded-lg overflow-hidden hover:border-purple-500/60 transition">
-                      <div className="relative overflow-hidden">
-                        <img src={img} alt={`Ritual PFP ${idx + 1}`} className="w-full aspect-square object-cover" />
-                        <button
-                          onClick={() => downloadImage(img, idx)}
-                          className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center"
-                        >
-                          <Download className="w-6 h-6 text-white" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <div className="h-full flex items-center justify-center">
-                <div className="text-center space-y-4">
-                  <div className="w-20 h-20 rounded-full bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mx-auto">
-                    <Wand2 className="w-10 h-10 text-purple-400 opacity-50" />
-                  </div>
-                  <p className="text-gray-400">Upload an image and generate your ritual PFP</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+        .result-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
 
-      {/* Footer */}
-      <div className="relative z-10 border-t border-purple-500/10 mt-20">
-        <div className="max-w-6xl mx-auto px-6 py-8 text-center text-sm text-gray-500">
-          <p>Created with mystical powers</p>
-          <p className="mt-2">
-            Creator: <a href="https://x.com/ega_2ez4crypto" target="_blank" rel="noopener noreferrer" className="text-purple-400 hover:text-purple-300 transition">@ega_2ez4crypto</a>
-          </p>
-        </div>
-      </div>
+        .result-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-      {/* Hidden canvas for processing */}
-      <canvas ref={canvasRef} className="hidden" />
+        .result-item:hover .result-overlay {
+            opacity: 1;
+        }
+
+        .download-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .download-icon {
+            width: 24px;
+            height: 24px;
+            color: white;
+        }
+
+        /* Empty State */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 400px;
+            text-align: center;
+        }
+
+        .empty-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+            color: #a78bfa;
+        }
+
+        .empty-state p {
+            color: #888;
+        }
+
+        /* Footer */
+        .footer {
+            position: relative;
+            z-index: 10;
+            border-top: 1px solid rgba(168, 85, 247, 0.1);
+            margin-top: 80px;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .footer p {
+            color: #666;
+            font-size: 13px;
+            margin: 5px 0;
+        }
+
+        .footer a {
+            color: #a78bfa;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer a:hover {
+            color: #c084fc;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-container">
+        <div class="bg-gradient"></div>
+        <div class="glow-1"></div>
+        <div class="glow-2"></div>
     </div>
-  );
-}
+
+    <div class="header">
+        <svg class="logo" viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g opacity="0.95">
+                <rect x="170" y="50" width="60" height="60" fill="white" />
+                <rect x="150" y="30" width="20" height="20" fill="black" />
+                <rect x="230" y="30" width="20" height="20" fill="black" />
+                <rect x="80" y="120" width="60" height="60" fill="white" />
+                <rect x="100" y="140" width="20" height="20" fill="black" />
+                <rect x="100" y="100" width="20" height="20" fill="black" />
+                <rect x="260" y="120" width="60" height="60" fill="white" />
+                <rect x="280" y="140" width="20" height="20" fill="black" />
+                <rect x="280" y="100" width="20" height="20" fill="black" />
+                <rect x="60" y="190" width="60" height="60" fill="white" />
+                <rect x="80" y="210" width="20" height="20" fill="black" />
+                <rect x="80" y="170" width="20" height="20" fill="black" />
+                <rect x="170" y="190" width="60" height="60" fill="white" />
+                <rect x="190" y="210" width="20" height="20" fill="black" />
+                <rect x="150" y="210" width="20" height="20" fill="black" />
+                <rect x="280" y="190" width="60" height="60" fill="white" />
+                <rect x="300" y="210" width="20" height="20" fill="black" />
+                <rect x="300" y="170" width="20" height="20" fill="black" />
+                <rect x="100" y="260" width="60" height="60" fill="white" />
+                <rect x="120" y="280" width="20" height="20" fill="black" />
+                <rect x="240" y="260" width="60" height="60" fill="white" />
+                <rect x="260" y="280" width="20" height="20" fill="black" />
+                <rect x="170" y="320" width="60" height="60" fill="white" />
+            </g>
+        </svg>
+        <h1>Ritual PFP</h1>
+        <p class="subtitle">GENERATOR</p>
+    </div>
+
+    <div class="container">
+        <div class="grid">
+            <!-- Upload Section -->
+            <div>
+                <div class="card">
+                    <label class="upload-area" id="uploadArea">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <span>Upload Your Photo</span>
+                        <span class="text-small">or drag and drop</span>
+                        <input type="file" id="fileInput" accept="image/*">
+                    </label>
+                </div>
+
+                <div id="previewSection" class="preview-section" style="display: none;">
+                    <span class="preview-label">Original Image</span>
+                    <img id="previewImg" class="preview-img" />
+                </div>
+
+                <div class="button-group">
+                    <button id="generateBtn" class="btn-primary" disabled>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 6l-6 6 6 6"></path>
+                        </svg>
+                        Generate Ritual PFP
+                    </button>
+                    <button id="startOverBtn" class="btn-secondary" style="display: none;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 7v6h6"></path>
+                            <path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"></path>
+                        </svg>
+                        Start Over
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsContainer">
+                <div class="empty-state">
+                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 6l-6 6 6 6"></path>
+                    </svg>
+                    <p>Upload an image and generate your ritual PFP</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Created with mystical powers</p>
+        <p>Creator: <a href="https://x.com/ega_2ez4crypto" target="_blank">@ega_2ez4crypto</a></p>
+    </div>
+
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const previewImg = document.getElementById('previewImg');
+        const previewSection = document.getElementById('previewSection');
+        const generateBtn = document.getElementById('generateBtn');
+        const startOverBtn = document.getElementById('startOverBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const canvas = document.getElementById('canvas');
+
+        let uploadedImage = null;
+
+        // Handle file input
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) loadImage(file);
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#a78bfa';
+            uploadArea.style.background = 'rgba(168, 85, 247, 0.1)';
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+            uploadArea.style.background = 'transparent';
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = 'rgba(168, 85, 247, 0.4)';
+            uploadArea.style.background = 'transparent';
+            const file = e.dataTransfer.files[0];
+            if (file) loadImage(file);
+        });
+
+        function loadImage(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                uploadedImage = e.target.result;
+                previewImg.src = uploadedImage;
+                previewSection.style.display = 'block';
+                generateBtn.disabled = false;
+                resultsContainer.innerHTML = '';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Generate ritual effects
+        generateBtn.addEventListener('click', async () => {
+            if (!uploadedImage) return;
+            generateBtn.disabled = true;
+            generateBtn.innerHTML = '<div class="loading"></div> Generating...';
+
+            try {
+                const img = new Image();
+                img.onload = () => {
+                    const variations = [];
+                    for (let i = 0; i < 4; i++) {
+                        canvas.width = 512;
+                        canvas.height = 512;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, 512, 512);
+
+                        applyEffect(ctx, canvas, i);
+                        variations.push(canvas.toDataURL('image/png'));
+                    }
+                    displayResults(variations);
+                    generateBtn.disabled = false;
+                    generateBtn.innerHTML = 'Generate Ritual PFP';
+                    startOverBtn.style.display = 'flex';
+                };
+                img.src = uploadedImage;
+            } catch (e) {
+                console.error(e);
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = 'Generate Ritual PFP';
+            }
+        });
+
+        function applyEffect(ctx, canvas, effectIndex) {
+            const centerX = 256;
+            const centerY = 256;
+
+            switch (effectIndex) {
+                case 0: // Glitch
+                    applyGlitchEffect(ctx, canvas);
+                    break;
+                case 1: // Arcane
+                    applyArcaneEffect(ctx, canvas);
+                    break;
+                case 2: // Shadow
+                    applyShadowEffect(ctx, canvas);
+                    break;
+                case 3: // Energy
+                    applyEnergyEffect(ctx, canvas);
+                    break;
+            }
+
+            drawRitualLogo(ctx, centerX, centerY, 180, 0, 0.9);
+        }
+
+        function drawRitualLogo(ctx, x, y, size, rotation, opacity) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(rotation);
+            ctx.globalAlpha = opacity;
+
+            const scale = size / 400;
+            ctx.scale(scale, scale);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+
+            // Draw logo
+            const rects = [
+                [-30, -130, 60, 60], [-50, -160, 20, 20], [30, -160, 20, 20],
+                [-140, -60, 60, 60], [-120, -40, 20, 20], [-120, -80, 20, 20],
+                [80, -60, 60, 60], [100, -40, 20, 20], [100, -80, 20, 20],
+                [-100, 20, 60, 60], [-80, 40, 20, 20], [-80, 0, 20, 20],
+                [-30, 50, 60, 60], [-10, 70, 20, 20], [-50, 70, 20, 20],
+                [40, 20, 60, 60], [60, 40, 20, 20], [60, 0, 20, 20],
+                [-120, 130, 60, 60], [-100, 150, 20, 20],
+                [60, 130, 60, 60], [80, 150, 20, 20],
+                [-30, 180, 60, 60]
+            ];
+
+            rects.forEach(([x, y, w, h]) => ctx.fillRect(x, y, w, h));
+            ctx.restore();
+        }
+
+        function applyGlitchEffect(ctx, canvas) {
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+            ctx.shadowBlur = 20;
+
+            for (let i = 0; i < 20; i++) {
+                const y = Math.random() * canvas.height;
+                ctx.fillStyle = `rgba(255, 0, 0, ${Math.random() * 0.3})`;
+                ctx.fillRect(0, y, canvas.width, Math.random() * 20);
+            }
+        }
+
+        function applyArcaneEffect(ctx, canvas) {
+            const gradient = ctx.createRadialGradient(256, 256, 0, 256, 256, 400);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+            gradient.addColorStop(0.7, 'rgba(138, 43, 226, 0.15)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = 'rgba(138, 43, 226, 0.6)';
+            ctx.lineWidth = 2;
+            for (let i = 50; i < 300; i += 40) {
+                ctx.beginPath();
+                ctx.arc(256, 256, i, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        function applyShadowEffect(ctx, canvas) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const vignette = ctx.createRadialGradient(256, 256, 0, 256, 256, 450);
+            vignette.addColorStop(0, 'rgba(0, 0, 0, 0)');
+            vignette.addColorStop(1, 'rgba(0, 0, 0, 0.6)');
+            ctx.fillStyle = vignette;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(20, 20, 472, 472);
+        }
+
+        function applyEnergyEffect(ctx, canvas) {
+            const glow = ctx.createRadialGradient(256, 256, 100, 256, 256, 300);
+            glow.addColorStop(0, 'rgba(0, 255, 255, 0.2)');
+            glow.addColorStop(1, 'rgba(0, 100, 255, 0.1)');
+            ctx.fillStyle = glow;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.7)';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.arc(256, 256, 120 + i * 40, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        function displayResults(variations) {
+            resultsContainer.innerHTML = `
+                <div class="results-section">
+                    <span class="results-label">Generated Variations</span>
+                    <div class="results-grid">
+                        ${variations.map((img, idx) => `
+                            <div class="result-item">
+                                <img src="${img}" />
+                                <div class="result-overlay">
+                                    <button class="download-btn" onclick="downloadImage('${img}', ${idx})">
+                                        <svg class="download-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="7 10 12 15 17 10"></polyline>
+                                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        window.downloadImage = (imageData, index) => {
+            const link = document.createElement('a');
+            link.href = imageData;
+            link.download = `ritual-pfp-${index + 1}.png`;
+            link.click();
+        };
+
+        startOverBtn.addEventListener('click', () => {
+            uploadedImage = null;
+            previewSection.style.display = 'none';
+            generateBtn.disabled = true;
+            startOverBtn.style.display = 'none';
+            resultsContainer.innerHTML = `
+                <div class="empty-state">
+                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 6l-6 6 6 6"></path>
+                    </svg>
+                    <p>Upload an image and generate your ritual PFP</p>
+                </div>
+            `;
+            fileInput.click();
+        });
+    </script>
+</body>
+</html>
