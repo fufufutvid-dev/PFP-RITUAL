@@ -257,14 +257,8 @@
 
         .result-section {
             display: none;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            margin-top: 40px;
-            border: 2px solid rgba(138, 43, 226, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
             text-align: center;
+            margin-top: 40px;
         }
 
         .result-section.active {
@@ -272,53 +266,157 @@
             animation: fadeIn 0.5s ease-out;
         }
 
-        .percentage {
-            font-size: 5em;
-            font-weight: 900;
-            margin: 30px 0;
-            animation: scaleIn 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        .pokemon-card {
+            width: 500px;
+            max-width: 95%;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 3px solid;
+            position: relative;
+            overflow: hidden;
+            animation: cardAppear 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        @keyframes scaleIn {
+        @keyframes cardAppear {
             0% {
-                transform: scale(0);
+                transform: scale(0.5) rotateY(180deg);
                 opacity: 0;
             }
             100% {
-                transform: scale(1);
+                transform: scale(1) rotateY(0deg);
                 opacity: 1;
             }
         }
 
-        .level-title {
-            font-size: 2.5em;
-            font-weight: 800;
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            animation: fadeIn 0.8s ease-out 0.2s backwards;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
         }
 
-        .level-description {
-            font-size: 1.2em;
+        .card-title {
+            font-size: 1.8em;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 20px currentColor;
+        }
+
+        .card-logo {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(138, 43, 226, 0.6);
+        }
+
+        .card-image-container {
+            position: relative;
+            margin: 20px 0;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-image {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .card-stats {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 2px solid;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 12px 0;
+            padding: 8px 0;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-value {
+            font-size: 1.3em;
+            font-weight: 900;
+            text-shadow: 0 0 10px currentColor;
+        }
+
+        .percentage-big {
+            font-size: 3.5em;
+            font-weight: 900;
+            margin: 15px 0;
+            text-shadow: 0 0 30px currentColor;
+            animation: pulseGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .stat-bar {
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .stat-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease-out;
+            box-shadow: 0 0 15px currentColor;
+            animation: fillBar 1s ease-out;
+        }
+
+        @keyframes fillBar {
+            0% { width: 0; }
+        }
+
+        .card-description {
+            font-size: 1em;
             color: #c8c8ff;
-            margin-bottom: 30px;
-            line-height: 1.6;
-            animation: fadeIn 0.8s ease-out 0.4s backwards;
+            margin-top: 15px;
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        .card-shine {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            animation: shine 3s infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
         }
 
         canvas {
             display: none;
-        }
-
-        #resultCanvas {
-            max-width: 100%;
-            height: auto;
-            border-radius: 15px;
-            box-shadow: 0 15px 50px rgba(138, 43, 226, 0.5);
-            margin: 30px 0;
-            border: 3px solid rgba(138, 43, 226, 0.6);
-            animation: fadeIn 0.8s ease-out 0.6s backwards;
         }
 
         .footer {
@@ -375,12 +473,17 @@
                 font-size: 1em;
             }
             
-            .percentage {
-                font-size: 3.5em;
+            .pokemon-card {
+                width: 100%;
+                padding: 20px;
             }
-            
-            .level-title {
-                font-size: 2em;
+
+            .card-title {
+                font-size: 1.3em;
+            }
+
+            .percentage-big {
+                font-size: 2.5em;
             }
         }
 
@@ -413,7 +516,7 @@
 <body>
     <div class="container">
         <div class="logo-container">
-            <img src="https://files.catbox.moe/81v18v.jpg" alt="RITUAL MAXI" id="logoImg">
+            <img src="https://files.catbox.moe/81v18v.jpg" alt="RITUAL MAXI" id="logoImg" crossorigin="anonymous">
         </div>
         
         <h1 class="title">RITUAL MAXI</h1>
@@ -442,12 +545,47 @@
         </div>
 
         <div class="result-section" id="resultSection">
-            <div class="level-title" id="levelTitle"></div>
-            <div class="percentage" id="percentageDisplay"></div>
-            <div class="level-description" id="levelDescription"></div>
-            <canvas id="resultCanvas"></canvas>
+            <div class="pokemon-card" id="pokemonCard">
+                <div class="card-shine"></div>
+                <div class="card-header">
+                    <div class="card-title" id="cardTitle">RITUAL MAXI</div>
+                    <img class="card-logo" id="cardLogo" src="https://files.catbox.moe/81v18v.jpg" alt="Logo" crossorigin="anonymous">
+                </div>
+                <div class="card-image-container">
+                    <canvas id="cardCanvas" class="card-image"></canvas>
+                </div>
+                <div class="card-stats" id="cardStats">
+                    <div class="stat-row">
+                        <span class="stat-label">Level</span>
+                        <span class="stat-value" id="levelName">-</span>
+                    </div>
+                    <div class="percentage-big" id="percentageBig">0%</div>
+                    <div class="stat-row">
+                        <span class="stat-label">Devotion</span>
+                        <span class="stat-value" id="devotionValue">-</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-bar-fill" id="devotionBar" style="width: 0%"></div>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Power</span>
+                        <span class="stat-value" id="powerValue">-</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-bar-fill" id="powerBar" style="width: 0%"></div>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Loyalty</span>
+                        <span class="stat-value" id="loyaltyValue">-</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-bar-fill" id="loyaltyBar" style="width: 0%"></div>
+                    </div>
+                    <div class="card-description" id="cardDescription">-</div>
+                </div>
+            </div>
             <div>
-                <button class="btn" id="downloadBtn">Download Result</button>
+                <button class="btn" id="downloadBtn">Download Card</button>
                 <button class="btn" id="tryAgainBtn">Try Another Photo</button>
             </div>
         </div>
@@ -457,7 +595,7 @@
         </div>
     </div>
 
-    <canvas id="hiddenCanvas"></canvas>
+    <canvas id="downloadCanvas" style="display: none;"></canvas>
 
     <script>
         const levels = [
@@ -466,45 +604,45 @@
                 minPercent: 1,
                 maxPercent: 20,
                 color: "#4a90e2",
-                glowColor: "rgba(74, 144, 226, 0.8)",
-                description: "You're just beginning to understand the power of RITUAL",
-                frameWidth: 15
+                borderColor: "#4a90e2",
+                description: "Just beginning to understand the power of RITUAL",
+                frameWidth: 12
             },
             {
                 name: "BELIEVER",
                 minPercent: 21,
                 maxPercent: 40,
                 color: "#00bfff",
-                glowColor: "rgba(0, 191, 255, 0.8)",
+                borderColor: "#00d4ff",
                 description: "Your faith in RITUAL is growing stronger",
-                frameWidth: 20
+                frameWidth: 15
             },
             {
                 name: "DEVOTED FOLLOWER",
                 minPercent: 41,
                 maxPercent: 60,
                 color: "#9370db",
-                glowColor: "rgba(147, 112, 219, 0.8)",
+                borderColor: "#a890f0",
                 description: "You've embraced the RITUAL way of life",
-                frameWidth: 25
+                frameWidth: 18
             },
             {
                 name: "RITUAL ZEALOT",
                 minPercent: 61,
                 maxPercent: 80,
                 color: "#8a2be2",
-                glowColor: "rgba(138, 43, 226, 0.8)",
+                borderColor: "#9d4bfa",
                 description: "Your dedication to RITUAL knows no bounds",
-                frameWidth: 30
+                frameWidth: 22
             },
             {
                 name: "ULTIMATE MAXI",
                 minPercent: 81,
                 maxPercent: 100,
                 color: "#ff00ff",
-                glowColor: "rgba(255, 0, 255, 0.9)",
+                borderColor: "#ff4dff",
                 description: "You are the embodiment of RITUAL perfection",
-                frameWidth: 35
+                frameWidth: 25
             }
         ];
 
@@ -515,9 +653,6 @@
         const generateBtn = document.getElementById('generateBtn');
         const resetBtn = document.getElementById('resetBtn');
         const resultSection = document.getElementById('resultSection');
-        const levelTitle = document.getElementById('levelTitle');
-        const percentageDisplay = document.getElementById('percentageDisplay');
-        const levelDescription = document.getElementById('levelDescription');
         const downloadBtn = document.getElementById('downloadBtn');
         const tryAgainBtn = document.getElementById('tryAgainBtn');
         const loading = document.getElementById('loading');
@@ -558,6 +693,7 @@
             const reader = new FileReader();
             reader.onload = (e) => {
                 uploadedImage = new Image();
+                uploadedImage.crossOrigin = "anonymous";
                 uploadedImage.onload = () => {
                     preview.src = e.target.result;
                     previewContainer.classList.add('active');
@@ -581,97 +717,234 @@
                     currentPercentage >= level.minPercent && currentPercentage <= level.maxPercent
                 );
 
-                createResultImage();
+                createCard();
                 
-                levelTitle.textContent = currentLevel.name;
-                percentageDisplay.textContent = `${currentPercentage}%`;
-                percentageDisplay.style.background = `linear-gradient(135deg, ${currentLevel.color}, ${currentLevel.glowColor})`;
-                percentageDisplay.style.webkitBackgroundClip = 'text';
-                percentageDisplay.style.webkitTextFillColor = 'transparent';
-                percentageDisplay.style.backgroundClip = 'text';
-                percentageDisplay.style.filter = `drop-shadow(0 0 20px ${currentLevel.glowColor})`;
-                
-                levelTitle.style.color = currentLevel.color;
-                levelTitle.style.textShadow = `0 0 30px ${currentLevel.glowColor}`;
-                levelDescription.textContent = currentLevel.description;
-
                 loading.classList.remove('active');
                 resultSection.classList.add('active');
                 resultSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }, 2000);
         }
 
-        function createResultImage() {
-            const canvas = document.getElementById('resultCanvas');
+        function createCard() {
+            const canvas = document.getElementById('cardCanvas');
             const ctx = canvas.getContext('2d');
 
-            const maxWidth = 800;
-            const maxHeight = 800;
-            let width = uploadedImage.width;
-            let height = uploadedImage.height;
-
-            if (width > maxWidth || height > maxHeight) {
-                const ratio = Math.min(maxWidth / width, maxHeight / height);
-                width *= ratio;
-                height *= ratio;
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(0, 0, width, height);
-
-            ctx.drawImage(uploadedImage, 0, 0, width, height);
+            const cardWidth = 450;
+            const cardHeight = 450;
+            canvas.width = cardWidth;
+            canvas.height = cardHeight;
 
             const frameWidth = currentLevel.frameWidth;
-            
-            ctx.shadowColor = currentLevel.glowColor;
-            ctx.shadowBlur = 30;
-            ctx.strokeStyle = currentLevel.color;
-            ctx.lineWidth = frameWidth;
-            
-            for (let i = 0; i < 3; i++) {
-                ctx.strokeRect(frameWidth/2, frameWidth/2, width - frameWidth, height - frameWidth);
+            const imageWidth = cardWidth - (frameWidth * 2);
+            const imageHeight = cardHeight - (frameWidth * 2);
+
+            let imgX = 0, imgY = 0, imgW = uploadedImage.width, imgH = uploadedImage.height;
+            const imgRatio = imgW / imgH;
+            const canvasRatio = imageWidth / imageHeight;
+
+            if (imgRatio > canvasRatio) {
+                imgW = imgH * canvasRatio;
+                imgX = (uploadedImage.width - imgW) / 2;
+            } else {
+                imgH = imgW / canvasRatio;
+                imgY = (uploadedImage.height - imgH) / 2;
             }
 
-            ctx.shadowBlur = 50;
-            ctx.strokeStyle = currentLevel.glowColor;
-            ctx.lineWidth = frameWidth - 5;
-            ctx.strokeRect(frameWidth/2, frameWidth/2, width - frameWidth, height - frameWidth);
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, 0, cardWidth, cardHeight);
 
-            const logoSize = Math.min(width, height) * 0.25;
-            const logoX = width - logoSize - 30;
-            const logoY = 30;
-            
-            ctx.shadowColor = currentLevel.glowColor;
-            ctx.shadowBlur = 40;
-            ctx.drawImage(logoImg, logoX, logoY, logoSize, logoSize);
+            ctx.drawImage(uploadedImage, imgX, imgY, imgW, imgH, frameWidth, frameWidth, imageWidth, imageHeight);
 
-            ctx.shadowBlur = 0;
-            const fontSize = Math.min(width, height) * 0.12;
-            ctx.font = `900 ${fontSize}px Arial`;
-            ctx.textAlign = 'center';
+            ctx.shadowColor = currentLevel.color;
+            ctx.shadowBlur = 25;
             
-            const gradient = ctx.createLinearGradient(0, height - 100, width, height - 100);
-            gradient.addColorStop(0, currentLevel.color);
-            gradient.addColorStop(0.5, '#ffffff');
-            gradient.addColorStop(1, currentLevel.color);
-            
-            ctx.fillStyle = gradient;
-            ctx.shadowColor = currentLevel.glowColor;
-            ctx.shadowBlur = 30;
-            ctx.fillText(`${currentPercentage}% MAXI`, width / 2, height - 80);
-            
-            ctx.font = `700 ${fontSize * 0.4}px Arial`;
-            ctx.fillText(currentLevel.name, width / 2, height - 40);
+            for (let i = 0; i < 3; i++) {
+                ctx.strokeStyle = currentLevel.borderColor;
+                ctx.lineWidth = frameWidth - (i * 2);
+                ctx.strokeRect(frameWidth/2, frameWidth/2, cardWidth - frameWidth, cardHeight - frameWidth);
+            }
+
+            ctx.shadowBlur = 35;
+            ctx.strokeStyle = currentLevel.color;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(frameWidth/2, frameWidth/2, cardWidth - frameWidth, cardHeight - frameWidth);
+
+            const pokemonCard = document.getElementById('pokemonCard');
+            pokemonCard.style.borderColor = currentLevel.borderColor;
+            pokemonCard.style.boxShadow = `0 20px 60px ${currentLevel.color}40, 0 0 40px ${currentLevel.color}30`;
+
+            const cardTitle = document.getElementById('cardTitle');
+            cardTitle.textContent = currentLevel.name;
+            cardTitle.style.color = currentLevel.color;
+
+            const levelName = document.getElementById('levelName');
+            levelName.textContent = currentLevel.name;
+            levelName.style.color = currentLevel.color;
+
+            const percentageBig = document.getElementById('percentageBig');
+            percentageBig.textContent = `${currentPercentage}%`;
+            percentageBig.style.color = currentLevel.color;
+
+            const devotion = Math.floor(currentPercentage * 0.8 + Math.random() * 20);
+            const power = Math.floor(currentPercentage * 0.9 + Math.random() * 15);
+            const loyalty = Math.floor(currentPercentage * 1.1);
+
+            document.getElementById('devotionValue').textContent = devotion;
+            document.getElementById('devotionValue').style.color = currentLevel.color;
+            document.getElementById('powerValue').textContent = power;
+            document.getElementById('powerValue').style.color = currentLevel.color;
+            document.getElementById('loyaltyValue').textContent = loyalty > 100 ? 100 : loyalty;
+            document.getElementById('loyaltyValue').style.color = currentLevel.color;
+
+            setTimeout(() => {
+                document.getElementById('devotionBar').style.width = `${devotion}%`;
+                document.getElementById('devotionBar').style.backgroundColor = currentLevel.color;
+                document.getElementById('powerBar').style.width = `${power}%`;
+                document.getElementById('powerBar').style.backgroundColor = currentLevel.color;
+                document.getElementById('loyaltyBar').style.width = `${loyalty > 100 ? 100 : loyalty}%`;
+                document.getElementById('loyaltyBar').style.backgroundColor = currentLevel.color;
+            }, 300);
+
+            document.getElementById('cardDescription').textContent = currentLevel.description;
+
+            const cardStats = document.getElementById('cardStats');
+            cardStats.style.borderColor = currentLevel.borderColor;
         }
 
         downloadBtn.addEventListener('click', () => {
-            const canvas = document.getElementById('resultCanvas');
+            const downloadCanvas = document.getElementById('downloadCanvas');
+            const ctx = downloadCanvas.getContext('2d');
+
+            const cardWidth = 600;
+            const padding = 40;
+            const logoSize = 80;
+            const spacing = 30;
+
+            const cardCanvas = document.getElementById('cardCanvas');
+            const cardImageHeight = (cardCanvas.height / cardCanvas.width) * (cardWidth - padding * 2);
+
+            const statsHeight = 400;
+            const totalHeight = padding * 3 + logoSize + spacing + cardImageHeight + spacing + statsHeight;
+
+            downloadCanvas.width = cardWidth;
+            downloadCanvas.height = totalHeight;
+
+            const gradient = ctx.createLinearGradient(0, 0, 0, totalHeight);
+            gradient.addColorStop(0, '#1a1a2e');
+            gradient.addColorStop(1, '#16213e');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, cardWidth, totalHeight);
+
+            let currentY = padding;
+
+            ctx.shadowColor = currentLevel.color;
+            ctx.shadowBlur = 20;
+            ctx.drawImage(logoImg, padding, currentY, logoSize, logoSize);
+            ctx.shadowBlur = 0;
+
+            ctx.font = 'bold 36px Arial';
+            ctx.fillStyle = currentLevel.color;
+            ctx.textAlign = 'right';
+            ctx.fillText(currentLevel.name, cardWidth - padding, currentY + logoSize / 2 + 12);
+
+            currentY += logoSize + spacing;
+
+            ctx.shadowColor = currentLevel.color;
+            ctx.shadowBlur = 30;
+            ctx.strokeStyle = currentLevel.borderColor;
+            ctx.lineWidth = 8;
+            ctx.strokeRect(padding, currentY, cardWidth - padding * 2, cardImageHeight);
+            
+            ctx.shadowBlur = 0;
+            ctx.drawImage(cardCanvas, padding, currentY, cardWidth - padding * 2, cardImageHeight);
+
+            currentY += cardImageHeight + spacing;
+
+            ctx.strokeStyle = currentLevel.borderColor;
+            ctx.lineWidth = 3;
+            ctx.strokeRect(padding, currentY, cardWidth - padding * 2, statsHeight);
+
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            ctx.fillRect(padding, currentY, cardWidth - padding * 2, statsHeight);
+
+            currentY += 40;
+
+            ctx.font = 'bold 72px Arial';
+            ctx.fillStyle = currentLevel.color;
+            ctx.textAlign = 'center';
+            ctx.fillText(`${currentPercentage}%`, cardWidth / 2, currentY);
+            currentY += 60;
+
+            const devotion = parseInt(document.getElementById('devotionValue').textContent);
+            const power = parseInt(document.getElementById('powerValue').textContent);
+            const loyalty = parseInt(document.getElementById('loyaltyValue').textContent);
+
+            ctx.font = 'bold 24px Arial';
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'left';
+
+            const statX = padding + 30;
+            const barWidth = cardWidth - padding * 2 - 60;
+            const barHeight = 12;
+
+            ctx.fillText('Devotion', statX, currentY);
+            ctx.textAlign = 'right';
+            ctx.fillStyle = currentLevel.color;
+            ctx.fillText(devotion.toString(), cardWidth - padding - 30, currentY);
+            currentY += 10;
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.fillRect(statX, currentY, barWidth, barHeight);
+            ctx.fillStyle = currentLevel.color;
+            ctx.shadowColor = currentLevel.color;
+            ctx.shadowBlur = 15;
+            ctx.fillRect(statX, currentY, (barWidth * devotion) / 100, barHeight);
+            ctx.shadowBlur = 0;
+            currentY += 50;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'left';
+            ctx.fillText('Power', statX, currentY);
+            ctx.textAlign = 'right';
+            ctx.fillStyle = currentLevel.color;
+            ctx.fillText(power.toString(), cardWidth - padding - 30, currentY);
+            currentY += 10;
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.fillRect(statX, currentY, barWidth, barHeight);
+            ctx.fillStyle = currentLevel.color;
+            ctx.shadowColor = currentLevel.color;
+            ctx.shadowBlur = 15;
+            ctx.fillRect(statX, currentY, (barWidth * power) / 100, barHeight);
+            ctx.shadowBlur = 0;
+            currentY += 50;
+
+            ctx.fillStyle = '#ffffff';
+            ctx.textAlign = 'left';
+            ctx.fillText('Loyalty', statX, currentY);
+            ctx.textAlign = 'right';
+            ctx.fillStyle = currentLevel.color;
+            ctx.fillText(loyalty.toString(), cardWidth - padding - 30, currentY);
+            currentY += 10;
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.fillRect(statX, currentY, barWidth, barHeight);
+            ctx.fillStyle = currentLevel.color;
+            ctx.shadowColor = currentLevel.color;
+            ctx.shadowBlur = 15;
+            ctx.fillRect(statX, currentY, (barWidth * loyalty) / 100, barHeight);
+            ctx.shadowBlur = 0;
+            currentY += 50;
+
+            ctx.font = 'italic 18px Arial';
+            ctx.fillStyle = '#c8c8ff';
+            ctx.textAlign = 'center';
+            const descText = currentLevel.description;
+            ctx.fillText(descText, cardWidth / 2, currentY);
+
             const link = document.createElement('a');
-            link.download = `ritual-maxi-${currentPercentage}-percent.png`;
-            link.href = canvas.toDataURL();
+            link.download = `ritual-maxi-card-${currentPercentage}.png`;
+            link.href = downloadCanvas.toDataURL('image/png');
             link.click();
         });
 
