@@ -1,301 +1,568 @@
-import React, { useState, useRef } from 'react';
-import { Upload, Download, RefreshCw, Sparkles, Wand2 } from 'lucide-react';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ritual PFP Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-export default function RitualGenerator() {
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [generatedImage, setGeneratedImage] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [selectedEffect, setSelectedEffect] = useState('mystical');
-  const canvasRef = useRef(null);
-  const fileInputRef = useRef(null);
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #2d1b4e 50%, #000000 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
 
-  const effects = {
-    mystical: { name: 'Mystical Aura', description: 'Glowing ethereal energy' },
-    cosmic: { name: 'Cosmic', description: 'Deep space energy' },
-    divine: { name: 'Divine Light', description: 'Sacred golden glow' },
-    phantom: { name: 'Phantom', description: 'Spectral ethereal form' },
-    infernal: { name: 'Infernal', description: 'Fiery chaos energy' },
-    celestial: { name: 'Celestial', description: 'Starry dimensional shift' }
-  };
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.15;
+        }
 
-  const applyEffect = (ctx, imgData, effectType) => {
-    const data = imgData.data;
-    
-    for (let i = 0; i < data.length; i += 4) {
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
+        .blob1 {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #a855f7 0%, transparent 70%);
+            border-radius: 50%;
+            top: 50px;
+            left: 50px;
+            filter: blur(80px);
+            animation: float 8s ease-in-out infinite;
+        }
 
-      if (effectType === 'mystical') {
-        data[i] = Math.min(255, r * 1.2);
-        data[i + 1] = Math.min(255, g * 1.15);
-        data[i + 2] = Math.min(255, b * 1.3);
-      } else if (effectType === 'cosmic') {
-        data[i] = r * 0.8;
-        data[i + 1] = Math.min(255, g * 1.1);
-        data[i + 2] = Math.min(255, b * 1.3);
-      } else if (effectType === 'divine') {
-        data[i] = Math.min(255, r * 1.25);
-        data[i + 1] = Math.min(255, g * 1.2);
-        data[i + 2] = b * 0.9;
-      } else if (effectType === 'phantom') {
-        const avg = (r + g + b) / 3;
-        data[i] = avg * 1.15;
-        data[i + 1] = avg * 1.1;
-        data[i + 2] = avg * 1.2;
-        data[i + 3] = data[i + 3] * 0.95;
-      } else if (effectType === 'infernal') {
-        data[i] = Math.min(255, r * 1.4);
-        data[i + 1] = Math.min(255, g * 0.85);
-        data[i + 2] = b * 0.7;
-      } else if (effectType === 'celestial') {
-        data[i] = Math.min(255, r * 1.1);
-        data[i + 1] = Math.min(255, g * 1.2);
-        data[i + 2] = Math.min(255, b * 1.35);
-      }
-    }
-    return imgData;
-  };
+        .blob2 {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #d946ef 0%, transparent 70%);
+            border-radius: 50%;
+            bottom: 50px;
+            right: 50px;
+            filter: blur(80px);
+            animation: float 10s ease-in-out infinite reverse;
+        }
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setUploadedImage(event.target?.result);
-        setGeneratedImage(null);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(30px); }
+        }
 
-  const generateRitual = async () => {
-    if (!uploadedImage) return;
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
 
-    setLoading(true);
-    
-    setTimeout(() => {
-      try {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        
-        img.onload = () => {
-          const canvas = canvasRef.current;
-          if (!canvas) return;
-          
-          const size = 512;
-          canvas.width = size;
-          canvas.height = size;
-          
-          const ctx = canvas.getContext('2d');
-          if (!ctx) return;
-          
-          ctx.fillStyle = '#0a0a0a';
-          ctx.fillRect(0, 0, size, size);
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
 
-          const scale = Math.min(size / img.width, size / img.height);
-          const x = (size - img.width * scale) / 2;
-          const y = (size - img.height * scale) / 2;
-          
-          ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+        h1 {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(90deg, #fbbf24 0%, #c084fc 50%, #ec4899 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
 
-          let imageData = ctx.getImageData(0, 0, size, size);
-          imageData = applyEffect(ctx, imageData, selectedEffect);
-          ctx.putImageData(imageData, 0, 0);
+        .subtitle {
+            color: #d1d5db;
+            font-size: 18px;
+            letter-spacing: 3px;
+            font-weight: 300;
+        }
 
-          // Add ritual frame
-          ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
-          ctx.lineWidth = 3;
-          ctx.setLineDash([10, 10]);
-          ctx.strokeRect(8, 8, size - 16, size - 16);
-          ctx.setLineDash([]);
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
 
-          // Add gradient overlay
-          const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, Math.max(size, size) / 1.5);
-          gradient.addColorStop(0, 'rgba(255, 215, 0, 0.1)');
-          gradient.addColorStop(1, 'rgba(138, 43, 226, 0.15)');
-          ctx.fillStyle = gradient;
-          ctx.fillRect(0, 0, size, size);
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
 
-          // Add symbols
-          const symbols = ['✦', '✧', '◆', '●', '○'];
-          ctx.fillStyle = 'rgba(255, 215, 0, 0.5)';
-          ctx.font = 'bold 20px serif';
-          
-          symbols.forEach((sym, i) => {
-            const angle = (i / symbols.length) * Math.PI * 2;
-            const radius = size / 2.5;
-            const px = size / 2 + Math.cos(angle) * radius;
-            const py = size / 2 + Math.sin(angle) * radius;
-            ctx.save();
-            ctx.translate(px, py);
-            ctx.rotate(angle);
-            ctx.fillText(sym, -5, 5);
-            ctx.restore();
-          });
+        .card {
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(0, 0, 0, 0.5) 100%);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+        }
 
-          setGeneratedImage(canvas.toDataURL());
-          setLoading(false);
-        };
+        .card:hover {
+            border-color: rgba(252, 191, 73, 0.5);
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(0, 0, 0, 0.6) 100%);
+        }
 
-        img.onerror = () => {
-          setLoading(false);
-        };
-        
-        img.src = uploadedImage;
-      } catch (err) {
-        setLoading(false);
-      }
-    }, 800);
-  };
+        .upload-area {
+            border: 2px dashed rgba(168, 85, 247, 0.5);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
 
-  const downloadImage = () => {
-    if (!generatedImage) return;
-    const a = document.createElement('a');
-    a.href = generatedImage;
-    a.download = `ritual-pfp-${Date.now()}.png`;
-    a.click();
-  };
+        .upload-area:hover {
+            border-color: rgba(252, 191, 73, 0.7);
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(0, 0, 0, 0.4) 100%);
+        }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-purple-900 to-black text-white overflow-hidden">
-      {/* Background Effects */}
-      <div className="fixed inset-0 opacity-20 pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-screen filter blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-20 right-10 w-72 h-72 bg-violet-600 rounded-full mix-blend-screen filter blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
-      </div>
+        .upload-area img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
 
-      {/* Header */}
-      <div className="relative z-10 pt-8 px-6 text-center mb-12">
-        <div className="flex items-center justify-center gap-3 mb-4">
-          <Wand2 className="w-8 h-8 text-amber-400" />
-          <h1 className="text-5xl font-black bg-gradient-to-r from-amber-300 via-purple-300 to-pink-300 bg-clip-text text-transparent">
-            RITUAL GENERATOR
-          </h1>
-          <Sparkles className="w-8 h-8 text-pink-400" />
-        </div>
-        <p className="text-gray-300 text-lg font-light tracking-widest">Transform Your Avatar Into Sacred Art</p>
-      </div>
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
 
-      <canvas ref={canvasRef} className="hidden" />
+        .upload-text {
+            font-size: 16px;
+            font-weight: 600;
+            color: #e5e7eb;
+        }
 
-      {/* Main Content */}
-      <div className="relative z-10 max-w-6xl mx-auto px-6 pb-16">
-        <div className="grid md:grid-cols-2 gap-12">
-          {/* Left Column - Upload */}
-          <div className="space-y-6">
-            <div className="bg-gradient-to-br from-purple-900/40 to-black border border-purple-500/30 rounded-2xl p-8 backdrop-blur-lg">
-              <div className="flex flex-col items-center justify-center space-y-6">
-                <div 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full aspect-square bg-gradient-to-br from-purple-800/20 to-black border-2 border-dashed border-purple-500/50 rounded-xl cursor-pointer hover:border-amber-400/50 transition-all flex items-center justify-center hover:bg-purple-900/20"
-                >
-                  {uploadedImage ? (
-                    <img src={uploadedImage} alt="Preview" className="w-full h-full object-cover rounded-lg" />
-                  ) : (
-                    <div className="text-center space-y-3">
-                      <Upload className="w-12 h-12 text-purple-400 mx-auto" />
-                      <p className="text-gray-300 font-medium">Upload Your Photo</p>
-                      <p className="text-gray-500 text-sm">PNG, JPG or GIF</p>
-                    </div>
-                  )}
-                </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-              </div>
-            </div>
+        .upload-subtext {
+            font-size: 14px;
+            color: #9ca3af;
+            margin-top: 5px;
+        }
 
-            {/* Effect Selection */}
-            <div className="space-y-4">
-              <h3 className="text-xl font-bold text-amber-300 flex items-center gap-2">
-                <Sparkles className="w-5 h-5" />
-                Choose Ritual Energy
-              </h3>
-              <div className="grid grid-cols-2 gap-3">
-                {Object.entries(effects).map(([key, effect]) => (
-                  <button
-                    key={key}
-                    onClick={() => setSelectedEffect(key)}
-                    className={`p-4 rounded-lg border-2 transition-all text-left ${
-                      selectedEffect === key
-                        ? 'border-amber-400 bg-amber-400/10'
-                        : 'border-purple-500/30 bg-purple-900/20 hover:border-purple-400/60'
-                    }`}
-                  >
-                    <p className="font-semibold text-sm">{effect.name}</p>
-                    <p className="text-xs text-gray-400 mt-1">{effect.description}</p>
-                  </button>
-                ))}
-              </div>
-            </div>
+        #fileInput {
+            display: none;
+        }
 
-            {/* Generate Button */}
-            <button
-              onClick={generateRitual}
-              disabled={!uploadedImage || loading}
-              className="w-full bg-gradient-to-r from-amber-400 to-pink-500 hover:from-amber-300 hover:to-pink-400 disabled:from-gray-600 disabled:to-gray-600 text-black font-bold py-4 rounded-xl transition-all transform hover:scale-105 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading ? (
-                <>
-                  <RefreshCw className="w-5 h-5 animate-spin" />
-                  Channeling Energy...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-5 h-5" />
-                  Generate Ritual PFP
-                </>
-              )}
-            </button>
-          </div>
+        .effects-section h3 {
+            color: #fbbf24;
+            font-size: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-          {/* Right Column - Preview */}
-          <div className="space-y-6">
-            <div className="bg-gradient-to-br from-purple-900/40 to-black border border-purple-500/30 rounded-2xl p-8 backdrop-blur-lg">
-              <div className="aspect-square bg-gradient-to-br from-purple-800/20 to-black border border-purple-500/50 rounded-xl overflow-hidden flex items-center justify-center">
-                {generatedImage ? (
-                  <img src={generatedImage} alt="Generated" className="w-full h-full object-contain" />
-                ) : (
-                  <div className="text-center space-y-3">
-                    <Wand2 className="w-12 h-12 text-purple-500/50 mx-auto" />
-                    <p className="text-gray-500">Your ritual awaits...</p>
-                  </div>
-                )}
-              </div>
-            </div>
+        .effects-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
 
-            {/* Download Button */}
-            {generatedImage && (
-              <button
-                onClick={downloadImage}
-                className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 text-white font-bold py-4 rounded-xl transition-all transform hover:scale-105 flex items-center justify-center gap-2"
-              >
-                <Download className="w-5 h-5" />
-                Download PFP
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+        .effect-btn {
+            padding: 15px;
+            border: 2px solid rgba(168, 85, 247, 0.3);
+            border-radius: 12px;
+            background: rgba(147, 51, 234, 0.15);
+            color: #e5e7eb;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-size: 14px;
+        }
 
-      {/* Footer */}
-      <div className="relative z-10 border-t border-purple-500/20 mt-16 pt-8 pb-6 px-6 text-center">
-        <p className="text-gray-400 text-sm mb-3">Created by talented minds in the crypto realm</p>
-        <a 
-          href="https://x.com/ega_2ez4crypto" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 text-amber-400 hover:text-amber-300 font-semibold transition-colors"
-        >
-          <Sparkles className="w-4 h-4" />
-          @ega_2ez4crypto
-        </a>
-      </div>
+        .effect-btn:hover {
+            border-color: rgba(168, 85, 247, 0.6);
+            background: rgba(147, 51, 234, 0.25);
+        }
+
+        .effect-btn.active {
+            border-color: #fbbf24;
+            background: rgba(251, 191, 36, 0.15);
+        }
+
+        .effect-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .effect-desc {
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn-generate {
+            background: linear-gradient(90deg, #fbbf24 0%, #ec4899 100%);
+            color: #000000;
+            margin-top: 10px;
+        }
+
+        .btn-generate:hover:not(:disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.4);
+        }
+
+        .btn-generate:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-download {
+            background: linear-gradient(90deg, #9333ea 0%, #7c3aed 100%);
+            color: #ffffff;
+        }
+
+        .btn-download:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(147, 51, 234, 0.4);
+        }
+
+        .preview-container {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .preview-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .preview-placeholder {
+            text-align: center;
+            color: #6b7280;
+        }
+
+        .preview-placeholder svg {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        footer {
+            text-align: center;
+            border-top: 1px solid rgba(168, 85, 247, 0.2);
+            padding-top: 30px;
+            margin-top: 50px;
+        }
+
+        .footer-text {
+            color: #9ca3af;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .creator-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #fbbf24;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .creator-link:hover {
+            color: #fcd34d;
+        }
+
+        .loading {
+            display: none;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .loading.active {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="blob1"></div>
+        <div class="blob2"></div>
     </div>
-  );
-}
+
+    <div class="container">
+        <header>
+            <h1>✦ RITUAL GENERATOR ✦</h1>
+            <p class="subtitle">Transform Your Avatar Into Sacred Art</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Left Column -->
+            <div>
+                <div class="card">
+                    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                        <div id="uploadPreview">
+                            <div class="upload-icon">📸</div>
+                            <div class="upload-text">Upload Your Photo</div>
+                            <div class="upload-subtext">PNG, JPG or GIF</div>
+                        </div>
+                    </div>
+                    <input type="file" id="fileInput" accept="image/*" onchange="handleImageUpload(event)">
+
+                    <div class="effects-section">
+                        <h3>✨ Choose Ritual Energy</h3>
+                        <div class="effects-grid">
+                            <button class="effect-btn active" onclick="selectEffect(this, 'mystical')">
+                                <div class="effect-name">Mystical Aura</div>
+                                <div class="effect-desc">Glowing ethereal</div>
+                            </button>
+                            <button class="effect-btn" onclick="selectEffect(this, 'cosmic')">
+                                <div class="effect-name">Cosmic</div>
+                                <div class="effect-desc">Deep space</div>
+                            </button>
+                            <button class="effect-btn" onclick="selectEffect(this, 'divine')">
+                                <div class="effect-name">Divine Light</div>
+                                <div class="effect-desc">Sacred glow</div>
+                            </button>
+                            <button class="effect-btn" onclick="selectEffect(this, 'phantom')">
+                                <div class="effect-name">Phantom</div>
+                                <div class="effect-desc">Spectral form</div>
+                            </button>
+                            <button class="effect-btn" onclick="selectEffect(this, 'infernal')">
+                                <div class="effect-name">Infernal</div>
+                                <div class="effect-desc">Fiery chaos</div>
+                            </button>
+                            <button class="effect-btn" onclick="selectEffect(this, 'celestial')">
+                                <div class="effect-name">Celestial</div>
+                                <div class="effect-desc">Starry shift</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-generate" onclick="generateRitual()" id="generateBtn" disabled>
+                        <span class="loading" id="spinner">⟳</span>
+                        <span id="btnText">Generate Ritual PFP</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+                <div class="card">
+                    <div class="preview-container">
+                        <div id="previewContent">
+                            <div class="preview-placeholder">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path>
+                                    <path d="M12 6v6l4 2"></path>
+                                </svg>
+                                <p>Your ritual awaits...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-download" onclick="downloadImage()" id="downloadBtn" style="display: none;">
+                        Download PFP
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p class="footer-text">Created by talented minds in the crypto realm</p>
+            <a href="https://x.com/ega_2ez4crypto" target="_blank" rel="noopener noreferrer" class="creator-link">
+                ✦ @ega_2ez4crypto
+            </a>
+        </footer>
+    </div>
+
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <script>
+        let uploadedImage = null;
+        let selectedEffect = 'mystical';
+        let generatedImage = null;
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadedImage = e.target.result;
+                    const preview = document.getElementById('uploadPreview');
+                    preview.innerHTML = `<img src="${uploadedImage}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">`;
+                    document.getElementById('generateBtn').disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function selectEffect(btn, effect) {
+            document.querySelectorAll('.effect-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedEffect = effect;
+        }
+
+        function applyEffect(ctx, imgData, effectType) {
+            const data = imgData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i + 1];
+                const b = data[i + 2];
+
+                if (effectType === 'mystical') {
+                    data[i] = Math.min(255, r * 1.2);
+                    data[i + 1] = Math.min(255, g * 1.15);
+                    data[i + 2] = Math.min(255, b * 1.3);
+                } else if (effectType === 'cosmic') {
+                    data[i] = r * 0.8;
+                    data[i + 1] = Math.min(255, g * 1.1);
+                    data[i + 2] = Math.min(255, b * 1.3);
+                } else if (effectType === 'divine') {
+                    data[i] = Math.min(255, r * 1.25);
+                    data[i + 1] = Math.min(255, g * 1.2);
+                    data[i + 2] = b * 0.9;
+                } else if (effectType === 'phantom') {
+                    const avg = (r + g + b) / 3;
+                    data[i] = avg * 1.15;
+                    data[i + 1] = avg * 1.1;
+                    data[i + 2] = avg * 1.2;
+                } else if (effectType === 'infernal') {
+                    data[i] = Math.min(255, r * 1.4);
+                    data[i + 1] = Math.min(255, g * 0.85);
+                    data[i + 2] = b * 0.7;
+                } else if (effectType === 'celestial') {
+                    data[i] = Math.min(255, r * 1.1);
+                    data[i + 1] = Math.min(255, g * 1.2);
+                    data[i + 2] = Math.min(255, b * 1.35);
+                }
+            }
+            return imgData;
+        }
+
+        function generateRitual() {
+            if (!uploadedImage) return;
+
+            const spinner = document.getElementById('spinner');
+            const btnText = document.getElementById('btnText');
+            document.getElementById('generateBtn').disabled = true;
+            spinner.classList.add('active');
+            btnText.textContent = 'Channeling Energy...';
+
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.getElementById('canvas');
+                const size = 512;
+                canvas.width = size;
+                canvas.height = size;
+
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#0a0a0a';
+                ctx.fillRect(0, 0, size, size);
+
+                const scale = Math.min(size / img.width, size / img.height);
+                const x = (size - img.width * scale) / 2;
+                const y = (size - img.height * scale) / 2;
+
+                ctx.drawImage(img, x, y, img.width * scale, img.height * scale);
+
+                let imageData = ctx.getImageData(0, 0, size, size);
+                imageData = applyEffect(ctx, imageData, selectedEffect);
+                ctx.putImageData(imageData, 0, 0);
+
+                // Add ritual frame
+                ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([10, 10]);
+                ctx.strokeRect(8, 8, size - 16, size - 16);
+                ctx.setLineDash([]);
+
+                // Add gradient overlay
+                const gradient = ctx.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, Math.max(size, size) / 1.5);
+                gradient.addColorStop(0, 'rgba(255, 215, 0, 0.1)');
+                gradient.addColorStop(1, 'rgba(138, 43, 226, 0.15)');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, size, size);
+
+                // Add symbols
+                const symbols = ['✦', '✧', '◆', '●', '○'];
+                ctx.fillStyle = 'rgba(255, 215, 0, 0.5)';
+                ctx.font = 'bold 20px serif';
+
+                symbols.forEach((sym, i) => {
+                    const angle = (i / symbols.length) * Math.PI * 2;
+                    const radius = size / 2.5;
+                    const px = size / 2 + Math.cos(angle) * radius;
+                    const py = size / 2 + Math.sin(angle) * radius;
+                    ctx.save();
+                    ctx.translate(px, py);
+                    ctx.rotate(angle);
+                    ctx.fillText(sym, -5, 5);
+                    ctx.restore();
+                });
+
+                generatedImage = canvas.toDataURL();
+                const previewContent = document.getElementById('previewContent');
+                previewContent.innerHTML = `<img src="${generatedImage}" style="width: 100%; height: 100%; object-fit: contain;">`;
+                document.getElementById('downloadBtn').style.display = 'flex';
+
+                spinner.classList.remove('active');
+                btnText.textContent = 'Generate Ritual PFP';
+                document.getElementById('generateBtn').disabled = false;
+            };
+            img.src = uploadedImage;
+        }
+
+        function downloadImage() {
+            if (!generatedImage) return;
+            const a = document.createElement('a');
+            a.href = generatedImage;
+            a.download = `ritual-pfp-${Date.now()}.png`;
+            a.click();
+        }
+    </script>
+</body>
+</html>
